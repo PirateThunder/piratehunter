@@ -16,7 +16,17 @@ router = APIRouter(tags=["employer"])
     summary="Профиль моей компании",
 )
 async def get_company(user: EmployerUser, session: DbDep) -> CompanySelfOut:
-    company = await service.get_company_or_404(session, user.id)
+    """Новый работодатель: пустой профиль компании (200), форма заполнения."""
+    company = await service.get_company(session, user.id)
+    if company is None:
+        return CompanySelfOut(
+            company_id=user.id,
+            name="",
+            description=None,
+            industry=None,
+            contacts={},
+            site=None,
+        )
     return service.to_self(company)
 
 

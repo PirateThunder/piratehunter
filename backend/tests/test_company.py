@@ -17,13 +17,18 @@ async def test_company_put_get(client):
     assert resp.json()["name"] == "Новое имя"
 
 
-async def test_company_get_404_before_fill(client):
+async def test_company_get_empty_draft_before_fill(client):
+    """Новый работодатель: GET отдаёт 200 с пустым профилем компании."""
     from tests.conftest import register_via_email, select_role
 
-    headers, _ = await register_via_email(client)
+    headers, user = await register_via_email(client)
     await select_role(client, headers, "employer")
     resp = await client.get("/api/v1/employer/company", headers=headers)
-    assert resp.status_code == 404
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["company_id"] == user["id"]
+    assert data["name"] == ""
+    assert data["contacts"] == {}
 
 
 async def test_catalog_proxy_and_cache(client, fake_core):

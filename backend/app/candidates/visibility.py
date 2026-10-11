@@ -13,6 +13,8 @@
   карточки.
 """
 
+from datetime import UTC, datetime
+
 from ..users.models import User
 from .constants import DEFAULT_PRIVACY, GRADE_UNVERIFIED
 from .models import CandidateProfile, GradeState
@@ -88,6 +90,32 @@ def to_employer_view(
         contacts=(
             to_contacts(profile, user) if contacts_allowed else None
         ),
+    )
+
+
+def empty_self(user: User) -> CandidateSelfOut:
+    """Пустой профиль для нового пользователя: GET отдаёт 200 с черновиком
+    (форма заполнения), а не 404 — иначе клиенты висят на ошибке."""
+    return CandidateSelfOut(
+        candidate_id=user.id,
+        fio="",
+        email=user.email,
+        phone=None,
+        contacts={},
+        spec_slug=None,
+        grade_claimed=None,
+        grade_verified=None,
+        grade_status="unverified",
+        experience_years=None,
+        stack=[],
+        roles=[],
+        soft_skills=[],
+        about=None,
+        privacy={},
+        fsp_id=user.fsp_id,
+        has_fsp=False,
+        fsp=None,
+        updated_at=datetime.now(UTC),
     )
 
 

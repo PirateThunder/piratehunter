@@ -19,13 +19,34 @@ async def test_put_profile_creates_then_updates(client):
     assert resp.json()["fio"] == "Иван Сидоров"
 
 
-async def test_profile_get_404_before_fill(client):
+async def test_profile_get_empty_draft_before_fill(client):
+    """Новый кандидат: GET отдаёт 200 с пустым черновиком (иначе клиенты
+    висят на 404-бесконечном лоадере)."""
+    from tests.conftest import register_via_email, select_role
+
+    headers, user = await register_via_email(client)
+    await select_role(client, headers, "candidate")
+    resp = await client.get("/api/v1/candidate/profile", headers=headers)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["candidate_id"] == user["id"]
+    assert data["fio"] == ""
+    assert data["spec_slug"] is None
+    assert data["stack"] == []
+
+
+async def test_grade_get_unverified_before_fill(client):
+    """Новый кандидат без профиля: грейд «unverified», без 404."""
     from tests.conftest import register_via_email, select_role
 
     headers, _ = await register_via_email(client)
     await select_role(client, headers, "candidate")
-    resp = await client.get("/api/v1/candidate/profile", headers=headers)
-    assert resp.status_code == 404
+    resp = await client.get("/api/v1/candidate/grade", headers=headers)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "unverified"
+    assert data["grade_verified"] is None
+    assert data["category_rank"] is None
 
 
 async def test_profile_validation_422(client):

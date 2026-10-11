@@ -23,7 +23,12 @@ router = APIRouter(tags=["candidate"])
     summary="Мой профиль (полный, с контактами)",
 )
 async def get_profile(user: CandidateUser, session: DbDep) -> CandidateSelfOut:
-    profile = await service.get_profile_or_404(session, user.id)
+    """Нового пользователя (вход через FSP ID/email) профиля ещё нет —
+    отдаём 200 с пустым черновиком: клиенты показывают форму заполнения,
+    а не зависают на 404."""
+    profile = await service.get_profile(session, user.id)
+    if profile is None:
+        return visibility.empty_self(user)
     grade_state = await service.get_grade_state(session, user.id)
     return visibility.to_self(profile, user, grade_state)
 
@@ -85,7 +90,22 @@ async def unlink_fsp(
 async def get_grade(
     user: CandidateUser, session: DbDep, core: CoreDep
 ) -> GradeOut:
-    profile = await service.get_profile_or_404(session, user.id)
+    profile = await service.get_profile(session, user.id)
+    if profile is None:
+        # новый пользователь: грейда нет — «не подтверждён», без 404
+        return GradeOut(
+            spec_slug=None,
+            grade_claimed=None,
+            grade_verified=None,
+            status="unverified",
+            theta=None,
+            last_test_at=None,
+            grade_changed_at=None,
+            retest_available_at=None,
+            change_available_at=None,
+            category_rank=None,
+            category_size=None,
+        )
     grade_state = await service.get_grade_state(session, user.id)
     retest_at, change_at = service.cooldown_dates(grade_state)
     rank = size = None
