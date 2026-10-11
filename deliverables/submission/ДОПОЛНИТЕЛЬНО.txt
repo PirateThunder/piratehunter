@@ -21,7 +21,12 @@ PirateHunter — трек ФСП · ЛЦТ 2026 · «Цифровая платф
 --------------------------
 Публичный API (OpenAPI): https://api.piratehunter.fun/docs — живой
                          Swagger UI, вся спецификация платформы
-Презентация (PDF):   см. приложенный архив (deliverables/submission/pitch.pdf)
+Презентация (PDF):   https://piratehunter.fun/pitch.pdf
+Презентация (PPTX):  https://piratehunter.fun/pitch.pptx
+Видеодемо:           https://piratehunter.fun/demo.mp4
+Документация (PDF):  https://piratehunter.fun/docs.pdf
+Документы (источники markdown): https://piratehunter.fun/docs.zip
+Архив доп. материалов (всё вместе): https://piratehunter.fun/dop-materialy.zip
 Презентация (PPTX):  deliverables/submission/pitch.pptx
 Видеодемо:           deliverables/submission/piratehunter-demo.mp4
                      (2:39, end-to-end: потребность → подборка с

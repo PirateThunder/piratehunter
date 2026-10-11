@@ -33,6 +33,13 @@ services:
       # публичный OpenAPI для интеграторов: api.piratehunter.fun/docs
       BACK_DOCS_PUBLIC: 1
 
+  frontend:
+    # материалы решения (pitch.pdf/pptx, demo.mp4, docs.pdf/zip, архив)
+    # раздаются статикой Next из public/ — том позволяет обновлять файлы
+    # без пересборки образа
+    volumes:
+      - ./frontend/public:/app/public:ro
+
   fsp-registry:
     environment:
       FSPREG_ISSUER: https://fsp-id.piratehunter.fun
