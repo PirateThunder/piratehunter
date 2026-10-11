@@ -1,0 +1,12 @@
+{
+  "name": "ph-demo-video",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "record": "node record.mjs",
+    "assemble": "bash assemble.sh"
+  },
+  "dependencies": {
+    "playwright": "^1.57.0"
+  }
+}

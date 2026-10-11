@@ -1,0 +1,196 @@
+# PirateHunter — монорепо-стек (паттерн piratepitch):
+# frontend (Next.js) + backend (/api/v1, ПДн) + core-api (internal) +
+# fsp-registry (internal). У backend и core-api — свои Postgres,
+# Redis общий у backend (коды/лимиты/фоновики — в следующих фазах).
+# core-api и fsp-registry наружу не выставлены (Caddy их не проксирует,
+# PRD §4.2); в dev-compose порты опубликованы на 127.0.0.1 для отладки.
+# Секреты — единый корневой .env (см. .env.example).
+name: piratehunter
+
+services:
+  # ── Postgres ×2 + Redis ─────────────────────────────────────────────
+  pg-back:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ph
+      POSTGRES_PASSWORD: ${BACK_DB_PASSWORD}
+      POSTGRES_DB: ph_back
+    volumes:
+      - pg_back:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:55432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ph -d ph_back"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  pg-core:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ph
+      POSTGRES_PASSWORD: ${CORE_DB_PASSWORD}
+      POSTGRES_DB: ph_core
+    volumes:
+      - pg_core:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:55433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ph -d ph_core"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "127.0.0.1:56379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  # ── backend: auth, профили, ПДн (/api/v1) ───────────────────────────
+  back-migrate:
+    build: ./backend
+    command: uv run --frozen --no-dev alembic upgrade head
+    environment:
+      BACK_DATABASE_URL: postgresql+asyncpg://ph:${BACK_DB_PASSWORD}@pg-back:5432/ph_back
+    depends_on:
+      pg-back:
+        condition: service_healthy
+
+  backend:
+    build: ./backend
+    command: uv run --frozen --no-dev uvicorn app.main:app --host 0.0.0.0 --port 64844
+    environment:
+      BACK_DATABASE_URL: postgresql+asyncpg://ph:${BACK_DB_PASSWORD}@pg-back:5432/ph_back
+      BACK_REDIS_URL: redis://redis:6379/0
+      BACK_ENV: ${BACK_ENV:-local}
+      BACK_JWT_SECRET: ${BACK_JWT_SECRET:-}
+      BACK_AUTH_DEV_LOGIN: ${BACK_AUTH_DEV_LOGIN:-0}
+      BACK_CORS_ORIGINS: ${BACK_CORS_ORIGINS:-}
+      BACK_CORE_API_URL: http://core-api:51457
+      BACK_FSP_REGISTRY_URL: http://fsp-registry:52457
+      # browser-facing адрес мок-OIDC (authorize ведёт сюда браузер);
+      # в проде — поддомен fsp-id.* (см. Caddyfile)
+      BACK_FSP_PUBLIC_URL: ${BACK_FSP_PUBLIC_URL:-http://localhost:52457}
+      # GET-callback backend'а на origin фронта (Next проксирует /api/*)
+      BACK_FSP_REDIRECT_URI: ${BACK_FSP_REDIRECT_URI:-http://localhost:56151/api/v1/auth/fsp/callback}
+      BACK_FRONT_URL: ${BACK_FRONT_URL:-http://localhost:56151}
+      BACK_SMTP_HOST: ${BACK_SMTP_HOST:-}
+      BACK_SMTP_PORT: ${BACK_SMTP_PORT:-465}
+      BACK_SMTP_USER: ${BACK_SMTP_USER:-}
+      BACK_SMTP_PASSWORD: ${BACK_SMTP_PASSWORD:-}
+      BACK_SMTP_FROM: ${BACK_SMTP_FROM:-}
+    ports:
+      - "127.0.0.1:64844:64844"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:64844/health', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    depends_on:
+      back-migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── core-api: тест-движок, матчинг (internal) ───────────────────────
+  core-api:
+    build: ./hunter_core
+    command: uv run --frozen --no-dev uvicorn app.main:app --host 0.0.0.0 --port 51457
+    environment:
+      CORE_DATABASE_URL: postgresql+asyncpg://ph:${CORE_DB_PASSWORD}@pg-core:5432/ph_core
+      CORE_ENV: ${CORE_ENV:-local}
+      CORE_INTERNAL_TOKEN: ${CORE_INTERNAL_TOKEN:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      HUNTER_LLM_MODEL: ${HUNTER_LLM_MODEL:-}
+    ports:
+      # internal-сервис: порт только для отладки, Caddy не проксирует
+      - "127.0.0.1:51457:51457"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:51457/health', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    depends_on:
+      pg-core:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── fsp-registry: мок-реестр достижений ФСП (internal) ──────────────
+  fsp-registry:
+    build: ./fsp_registry
+    command: uv run --frozen --no-dev uvicorn app.main:app --host 0.0.0.0 --port 52457
+    environment:
+      # issuer/discovery — browser-facing адрес (см. BACK_FSP_PUBLIC_URL)
+      FSPREG_ISSUER: ${BACK_FSP_PUBLIC_URL:-http://localhost:52457}
+      FSPREG_JWT_SECRET: ${FSPREG_JWT_SECRET:-}
+    ports:
+      # internal-сервис: порт только для отладки, Caddy не проксирует
+      - "127.0.0.1:52457:52457"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:52457/health', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  # ── frontend: лендинг + оба ЛК (Next.js, FSD) ───────────────────────
+  # Браузер ходит только на same-origin /api/* — Next-сервер проксирует
+  # в backend (rewrites в next.config.ts). NEXT_PUBLIC_* впекаются
+  # в бандл при сборке — смена значений = пересборка образа.
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_DEV_LOGIN: ${NEXT_PUBLIC_DEV_LOGIN:-}
+        NEXT_PUBLIC_API_MOCK: ${NEXT_PUBLIC_API_MOCK:-0}
+        # rewrites запекаются в routes-manifest на этапе сборки — адрес
+        # бэка должен быть build-arg, а не только runtime env
+        BACKEND_URL: http://backend:64844
+    environment:
+      NODE_ENV: production
+      PORT: 56151
+      BACKEND_URL: http://backend:64844
+    ports:
+      - "127.0.0.1:56151:56151"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:56151/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    depends_on:
+      backend:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  pg_back:
+  pg_core:

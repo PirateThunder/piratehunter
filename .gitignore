@@ -1,0 +1,29 @@
+# секреты и материалы кейса (не в git)
+.env
+.env.*
+!.env.example
+materials/
+
+# Python
+__pycache__/
+.venv/
+*.egg-info
+.ruff_cache
+.pytest_cache
+
+# Node / Next
+node_modules/
+.next/
+dist/
+
+# артефакты демо-видео (в git — только итоговый mp4 + исходники сцен)
+deliverables/demo-video/scenes/
+deliverables/demo-video/build/
+
+# прочее
+*.log
+.DS_Store
+
+# исключение: артефакты валидации §9 — часть документации (docs/VALIDATION.md)
+!hunter_core/out/
+!hunter_core/out/validation/

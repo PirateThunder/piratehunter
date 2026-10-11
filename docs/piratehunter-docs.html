@@ -1,0 +1,627 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><title>PirateHunter — документация</title><style>
+@page { size: A4; margin: 16mm 14mm; }
+* { box-sizing: border-box; }
+body { font-family: 'Inter', 'Liberation Sans', sans-serif; color: #1B1C21;
+       font-size: 10pt; line-height: 1.45; margin: 0; }
+h1 { font-size: 20pt; margin: 0 0 6pt; }
+h2 { font-size: 14pt; margin: 16pt 0 6pt; color: #1B1C21;
+     border-bottom: 2px solid #402FFF; padding-bottom: 3pt; page-break-after: avoid; }
+h3 { font-size: 11.5pt; margin: 11pt 0 4pt; color: #2D2E37; page-break-after: avoid; }
+h4 { font-size: 10.5pt; margin: 9pt 0 3pt; color: #2D2E37; }
+p { margin: 4pt 0; }
+ul, ol { margin: 4pt 0 4pt 18pt; padding: 0; }
+li { margin: 2pt 0; }
+table { border-collapse: collapse; width: 100%; margin: 6pt 0; font-size: 8.4pt; }
+th { background: #1B1C21; color: #fff; text-align: left; padding: 4pt 6pt; }
+td { border-bottom: 1px solid #E4E4E8; padding: 3.5pt 6pt; vertical-align: top; }
+tr { page-break-inside: avoid; }
+.mono, code { font-family: 'JetBrains Mono', 'Liberation Mono', monospace;
+              font-size: 8.4pt; }
+code { background: #EDEDED; padding: 0 3pt; border-radius: 3pt; }
+pre { background: #1B1C21; color: #EDEDED; padding: 8pt 10pt; border-radius: 6pt;
+      font-size: 7.6pt; line-height: 1.4; white-space: pre-wrap;
+      font-family: 'JetBrains Mono', monospace; }
+a { color: #402FFF; text-decoration: none; }
+hr { border: none; border-top: 1px solid #EDEDED; margin: 8pt 0; }
+.cover { padding-top: 180pt; }
+.cover .brand { color: #402FFF; font-size: 13pt; letter-spacing: 2pt;
+                text-transform: uppercase; margin-bottom: 8pt; font-weight: 700; }
+.cover .sub { font-size: 12.5pt; color: #838388; margin-top: 4pt; }
+.cover .meta { margin-top: 110pt; color: #4d5560; font-size: 10pt; }
+.cover .meta b { color: #1B1C21; }
+.pagebreak { page-break-before: always; }
+.section { page-break-before: always; }
+</style></head><body>
+<div class="cover"><div class="brand">PirateHunter · трек ФСП · ЛЦТ 2026</div><h1>Техническая документация</h1><div class="sub">Платформа-агрегатор ИТ-вакансий с обратной механикой:<br>работодатель сам находит кандидата в категоризованной базе (специализация × подтверждённый тестом грейд)</div><div class="meta"><p><b>Живой сервис:</b> https://piratehunter.fun</p><p><b>OpenAPI:</b> /docs на backend (BACK_ENV=local)</p><p><b>Репозиторий:</b> публичный GitHub (см. README)</p><p><b>Дата сборки:</b> 11 октября 2026</p></div></div>
+<div class="section"><h2>PirateHunter</h2>
+<p>Платформа подбора ИТ-специалистов с <b>обратной механикой</b>: работодатель</p>
+<p>находит кандидата сам. Кандидаты автоматически категоризуются по</p>
+<p>объективно подтверждаемому профилю — опрос по специализации, адаптивный</p>
+<p>CAT-тест на заявленный грейд (грейд = результат теста, не стаж),</p>
+<p>достижения ФСП — и попадают в категоризованную базу (7 специализаций ×</p>
+<p>4 грейда). Работодатель описывает потребность, получает объяснимую</p>
+<p>подборку («почему этот человек» — разложение score по факторам) и</p>
+<p>направляет конкретному кандидату приглашение **с обязательной зарплатной</p>
+<p>вилкой**. Контакты кандидата раскрываются только после принятия</p>
+<p>приглашения. Достижения ФСП влияют на ранжирование внутри категории,</p>
+<p>но не на грейд; кейс «нет истории ФСП» — первоклассный: профиль</p>
+<p>показывается со статусом, участвует в подборке без буста.</p>
+<p>Кейс ФСП (ЛЦТ 2026, спец. трек). <b>Живой сервис: https://piratehunter.fun</b>.</p>
+<p>Репозиторий: https://github.com/piratehunter-team/piratehunter</p>
+<p>(плейсхолдер — заменить на публичный к сдаче). Источник правды по</p>
+<p>продукту — <a href="PRD.md">PRD.md</a>; материалы кейса (ТЗ, брендбук) — в</p>
+<p><code class="mono">materials/</code> (не в git). Техническая документация — <a href="docs/">docs/</a></p>
+<p>(ARCHITECTURE, RUN, TESTING, VALIDATION, MATCHING, FSP-INTEGRATION, API;</p>
+<p>единый PDF собирается <code class="mono">docs/build_docs.py</code>).</p>
+<p><b>Стек:</b> Python 3.13 · FastAPI · Pydantic v2 · SQLAlchemy 2 (async) ·</p>
+<p>Alembic · PostgreSQL 16 ×2 · Redis 7 · numpy (IRT) · OpenRouter LLM</p>
+<p>(Qwen-класс, с fallback) · Next.js 16 (App Router, FSD) · Bun ·</p>
+<p>Tailwind v4 · zustand · Docker · Caddy · pytest/ruff/biome.</p>
+<h3>Быстрый старт</h3>
+<pre>cp .env.example .env                               # 1. конфиг (дефолты для dev)
+docker compose --env-file .env up -d --build       # 2. всё: 4 сервиса + PG×2 + Redis
+./scripts/seed.sh                                  # 3. эталонные демо-данные</pre>
+<p>Открыть http://localhost:56151. OpenAPI backend — http://localhost:64844/docs</p>
+<p>(<code class="mono">BACK_ENV=local</code>). Сквозной смоук: <code class="mono">./scripts/smoke.sh</code> (14 шагов по</p>
+<p>живому стеку), сброс стенда: <code class="mono">./scripts/reset-dev.sh</code>. Подробно —</p>
+<p><a href="docs/RUN.md">docs/RUN.md</a>.</p>
+<h3>Демо-аккаунты (dev-login)</h3>
+<p>На <code class="mono">/login</code> — кнопка входа без почты (<code class="mono">BACK_AUTH_DEV_LOGIN=1</code>, dev-дефолт;</p>
+<p>эквивалент API: <code class="mono">POST /api/v1/auth/dev {&quot;account&quot;: &quot;&lt;имя&gt;&quot;}</code>):</p>
+<table><thead><tr><th>Аккаунт</th><th>Роль</th><th>Что показывает</th></tr></thead><tbody><tr><td><code class="mono">candidate</code></td><td>Кандидат</td><td>Без истории ФСП (обязательный кейс «404»)</td></tr><tr><td><code class="mono">candidate-fsp</code></td><td>Кандидат</td><td>С привязанным ФСП ID <code class="mono">fsp_001</code> — богатая история достижений</td></tr><tr><td><code class="mono">employer</code></td><td>Работодатель</td><td>Потребность → подборка с explanation → приглашение с вилкой</td></tr></tbody></table>
+<p>Вход через FSP ID: кнопка «Войти через FSP ID» на <code class="mono">/login</code> проходит</p>
+<p>полный мок-OIDC флоу (fsp_001 → тот же демо-аккаунт <code class="mono">candidate-fsp</code>).</p>
+<p>Экспресс-тест для жюри — 4 вопроса, 3–5 минут.</p>
+<h3>Архитектура</h3>
+<p>Монорепо, четыре сервиса, общение только по HTTP, ноль shared-кода.</p>
+<p>Персональные данные живут только в backend; core-api оперирует</p>
+<p>анонимными <code class="mono">candidate_id</code> (privacy by design). Internal-сервисы наружу</p>
+<p>не выставлены — с ними общается только backend внутри docker-сети.</p>
+<table><thead><tr><th>Сервис</th><th>Порт</th><th>Назначение</th><th>Наружу</th></tr></thead><tbody><tr><td><code class="mono">frontend</code></td><td>56151</td><td>Next.js (FSD): лендинг + ЛК кандидата + ЛК работодателя</td><td>да (через Caddy)</td></tr><tr><td><code class="mono">backend</code></td><td>64844</td><td>FastAPI <code class="mono">/api/v1</code>: auth (email-код, FSP ID, dev-login), профили, ПДн, приглашения</td><td>да (<code class="mono">/api/v1</code>)</td></tr><tr><td><code class="mono">core-api</code></td><td>51457</td><td>FastAPI internal: тест-движок (CAT-lite), матчинг с explanation, каталог</td><td>нет</td></tr><tr><td><code class="mono">fsp-registry</code></td><td>52457</td><td>FastAPI internal: мок-реестр достижений ФСП + мок-OIDC «FSP ID»</td><td>нет*</td></tr><tr><td><code class="mono">pg-back</code> / <code class="mono">pg-core</code></td><td>—</td><td>PostgreSQL 16, БД <code class="mono">ph_back</code> / <code class="mono">ph_core</code></td><td>нет</td></tr><tr><td><code class="mono">redis</code></td><td>—</td><td>Redis 7: коды auth, OIDC state, кэш</td><td>нет</td></tr></tbody></table>
+<p>\* В проде authorize-страница мок-OIDC доступна браузеру отдельным</p>
+<p>поддоменом <code class="mono">fsp-id.*</code> (см. <code class="mono">Caddyfile</code>). В dev порты опубликованы на</p>
+<p><code class="mono">127.0.0.1</code> для отладки (у PG/Redis — 55432/55433/56379). Деплой на VPS</p>
+<p>(2 vCPU/4 ГБ): образы переносятся готовыми <code class="mono">docker save | ssh docker load</code></p>
+<p>— <a href="docs/RUN.md">docs/RUN.md</a>.</p>
+<h3>Качество</h3>
+<p>202 автотеста (hunter_core 75 · backend 110 · fsp_registry 17), живой</p>
+<p>смоук 14 шагов, воспроизводимый цикл reset→smoke→seed, детерминированные</p>
+<p>сиды (302 кандидата / 16 компаний / 6 потребностей / 40 приглашений).</p>
+<p>Валидация (PRD §9): стабильность грейда 96.7% (порог 80%), ±1 — 100%</p>
+<p>(порог 97%), Spearman 0.972 (порог 0.85), Precision@5 0.85 (порог 0.8);</p>
+<p>полный прогон 300×3: 99% / 0.977 — <a href="docs/VALIDATION.md">docs/VALIDATION.md</a>.</p>
+<h3>Структура</h3>
+<pre>piratehunter/
+├── PRD.md               # источник правды по продукту
+├── README.md
+├── docker-compose.yml   # стек: 4 сервиса + PG×2 + Redis (+ back-migrate)
+├── Caddyfile            # прод: TLS (Let&#x27;s Encrypt), reverse proxy
+├── .env.example
+├── docs/                # техническая документация (ARCHITECTURE, RUN,
+│                        #   TESTING, VALIDATION, MATCHING,
+│                        #   FSP-INTEGRATION, API + build_docs.py → PDF)
+├── backend/             # FastAPI · /api/v1 · ПДн · Alembic · pytest
+├── hunter_core/         # core-api · engine/ (CAT, скоринг) · itembank/ ·
+│                        #   validation/ (харнесс §9) · llm/
+├── fsp_registry/        # мок-реестр достижений ФСП + мок-OIDC (stateless)
+├── frontend/            # Next.js 16 FSD · айдентика ФСП (tokens.fsp.css)
+├── scripts/             # reset-dev.sh · seed.sh · smoke.sh
+└── materials/           # ТЗ, брендбук (не в git)</pre></div>
+<div class="section"><h1>1. Архитектура</h1><h2>Архитектура PirateHunter</h2>
+<p>Платформа-агрегатор ИТ-вакансий с обратной механикой: работодатель сам</p>
+<p>находит кандидата в категоризованной базе. Четыре сервиса в монорепо,</p>
+<p>общение только по HTTP, ноль shared-кода (принципы унаследованы от</p>
+<p>проекта piratepitch). Живой сервис: <b>https://piratehunter.fun</b>.</p>
+<h3>Диаграмма</h3>
+<pre>flowchart TD
+    Browser[Браузер] --&gt;|same-origin /api/* rewrites| FE[frontend :56151&lt;br/&gt;Next.js 16, FSD]
+    Browser --&gt;|OIDC authorize| FSP[fsp_registry :52457&lt;br/&gt;мок-OIDC «FSP ID»]
+    FSP --&gt;|303 code+state| FE
+    FE --&gt;|/api/v1 JWT| BE[backend :64844&lt;br/&gt;ПДн, auth, приглашения]
+    BE --&gt;|HTTP internal| CORE[core-api :51457&lt;br/&gt;CAT-тесты, матчинг]
+    BE --&gt;|HTTP internal| FSP
+    BE --&gt; PG1[(PG ph_back)]
+    CORE --&gt; PG2[(PG ph_core)]
+    BE --&gt; R[(Redis)]
+    EXT[Caddy :80/443] --&gt; FE
+    EXT --&gt; BE</pre>
+<p>Второй вариант — та же схема текстом (для печати):</p>
+<pre>                 Браузер
+        ┌──────────┴───────────┐
+        │ same-origin /api/*   │ OIDC: /oidc/authorize → 303 (code,state)
+        ▼                      ▼                 │
+ frontend :56151      fsp_registry :52457 ───────┘
+ Next.js (FSD)        мок-OIDC «FSP ID» + реестр достижений
+        │                      ▲
+        │ /api/v1 (JWT)        │ HTTP (внутр. docker-сеть)
+        ▼                      │
+ backend :64844 ──────────────┘
+ /api/v1 · auth · ПДн · приглашения
+ PG ph_back · Redis
+        │ HTTP (внутр. docker-сеть, наружу не выставлен)
+        ▼
+ core-api :51457 — CAT-тест-движок, матчинг, каталог
+ PG ph_core
+
+ Caddy :80/:443 → frontend (сайт) + backend (/api/v1), TLS автоматически</pre>
+<h3>Сервисы и порты</h3>
+<table><thead><tr><th>Сервис</th><th>Порт</th><th>Наружу</th><th>Назначение</th></tr></thead><tbody><tr><td>frontend</td><td>56151</td><td>да (через Caddy)</td><td>Next.js 16 (App Router, FSD): лендинг + ЛК кандидата + ЛК работодателя одним приложением</td></tr><tr><td>backend</td><td>64844</td><td>да (<code class="mono">/api/v1</code>, JWT)</td><td>Auth (email-код / FSP ID / dev-login), профили, ПДн, потребности, приглашения, рынок вилок</td></tr><tr><td>core-api</td><td>51457</td><td>нет (internal)</td><td>Тест-движок CAT, матчинг, каталог специализаций, LLM-парсинг потребностей</td></tr><tr><td>fsp_registry</td><td>52457</td><td>нет (internal)*</td><td>Мок-реестр достижений ФСП + мок-OIDC-провайдер «FSP ID»</td></tr><tr><td>pg-back / pg-core</td><td>5432</td><td>нет</td><td>PostgreSQL 16, отдельная БД на сервис: <code class="mono">ph_back</code> / <code class="mono">ph_core</code></td></tr><tr><td>redis</td><td>6379</td><td>нет</td><td>Коды auth, OIDC state, кэш профилей ФСП, лимиты</td></tr><tr><td>caddy</td><td>80/443</td><td>да</td><td>TLS (Let&#x27;s Encrypt, HTTP-01), reverse proxy</td></tr></tbody></table>
+<p>\* В проде fsp_registry выставляется отдельным поддоменом <code class="mono">fsp-id.*</code></p>
+<p>только для authorize-страницы мок-OIDC (браузер должен на неё зайти);</p>
+<p>все остальные его эндпоинты — внутренние. См. <code class="mono">Caddyfile</code>.</p>
+<h3>Принципы (PRD §4.2)</h3>
+<ul><li><b>Ноль shared-кода</b> — сервисы общаются только по HTTP. Frontend знает</li></ul>
+<p>  только backend; backend знает core-api и fsp_registry. Ни один сервис</p>
+<p>  не импортирует код другого.</p>
+<ul><li><b>Свои PG + Redis</b> у backend и hunter_core — независимые релизы и</li></ul>
+<p>  миграции (Alembic у backend).</p>
+<ul><li><b>core-api и fsp_registry наружу не выставлены</b> — Caddy их не</li></ul>
+<p>  проксирует; в dev-compose порты опубликованы на <code class="mono">127.0.0.1</code> только</p>
+<p>  для отладки и смоука.</p>
+<ul><li><b>ПДн только в backend</b> (privacy by design, аргумент для 152-ФЗ):</li></ul>
+<p>  ФИО, телефон, контакты, согласия живут в <code class="mono">ph_back</code> и никуда не</p>
+<p>  уходят. core-api получает и хранит лишь анонимный <code class="mono">candidate_id</code> и</p>
+<p>  оценочный снапшот. fsp_registry хранит синтетические достижения без</p>
+<p>  ПДн; привязка <code class="mono">fsp_id ↔ candidate_id</code> — только в backend.</p>
+<ul><li><b>Детерминированные fallback везде</b>: LLM-фичи (парсинг потребности,</li></ul>
+<p>  перефразировка заданий) работают и без ключа/сети — демо не зависит</p>
+<p>  от внешних API.</p>
+<h3>Потоки данных</h3>
+<h4>Оценочный снапшот (backend → core-api)</h4>
+<p>После каждого изменения профиля (тест пройден, ФСП привязан/отвязан,</p>
+<p>профиль обновлён) backend пушит в core:</p>
+<pre>PUT /internal/snapshots/{candidate_id}
+{candidate_id, spec, grade_verified, theta, test_score, fsp_score,
+ stack[], updated_at}</pre>
+<p><code class="mono">test_score: null</code> = «вычисли сам из θ». Матчинг читает <b>только</b></p>
+<p>снапшоты — подборка не дёргает backend и не видит ПДн.</p>
+<h4>Результат подборки (core-api → backend)</h4>
+<p><code class="mono">POST /internal/match</code> возвращает ranked `[{candidate_id, score,</p>
+<p>explanation, in_category}]` → backend джойнит с профилями (<code class="mono">ph_back</code>),</p>
+<p>применяет правила видимости (контакты скрыты до accept) и отдаёт фронту.</p>
+<p>Кандидаты вне категории идут отдельным блоком «рядом с запросом»</p>
+<p>(<code class="mono">in_category=false</code>).</p>
+<h4>ФСП (backend → fsp_registry)</h4>
+<p>Backend по <code class="mono">fsp_id</code> запрашивает <code class="mono">GET /fsp/v1/profiles/{fsp_id}</code>,</p>
+<p>считает <code class="mono">fsp_score</code> (формула — MATCHING.md), кэширует в Redis</p>
+<p>(TTL 3600 с) и включает в снапшот. <b>404 = нет истории</b> →</p>
+<p><code class="mono">fsp_score = 0</code>, блок достижений не показывается (обязательный кейс ТЗ).</p>
+<h4>Тест (backend → core-api, проксирование)</h4>
+<p>Frontend ходит на <code class="mono">POST /api/v1/tests/sessions</code> и</p>
+<p><code class="mono">POST /api/v1/tests/sessions/{id}/answers</code>; backend проксирует в</p>
+<p><code class="mono">core-api /internal/tests/...</code> с подстановкой <code class="mono">candidate_id</code>, возвращает</p>
+<p>вопрос/результат. Состояние сессии CAT живёт в <code class="mono">ph_core</code>.</p>
+<h4>Вход через FSP ID (redirect-цепочка)</h4>
+<p>Backend <code class="mono">/api/v1/auth/fsp/authorize</code> отдаёт <code class="mono">authorize_url</code> на</p>
+<p>browser-facing адрес реестра (<code class="mono">BACK_FSP_PUBLIC_URL</code>, <code class="mono">login_hint</code> как</p>
+<p>у OIDC); реестр 303-ит браузер на <code class="mono">BACK_FSP_REDIRECT_URI</code> = GET-callback</p>
+<p>backend&#x27;а <b>на origin фронта</b> (Next проксирует <code class="mono">/api/*</code> — refresh-cookie</p>
+<p><code class="mono">ph_refresh</code> ставится на домен фронта); backend обменивает</p>
+<p>code→token→userinfo и 303-ит на <code class="mono">/login/callback</code>, сессию поднимает</p>
+<p>bootstrap через <code class="mono">/auth/refresh</code>. Подробно — FSP-INTEGRATION.md.</p>
+<h3>Доменная модель (кратко, полная — PRD §5)</h3>
+<ul><li><b>backend (<code class="mono">ph_back</code>)</b>: User, AuthCode, CandidateProfile (ФИО,</li></ul>
+<p>  контакты, стек, согласия 152-ФЗ), GradeState (кулдауны), Company,</p>
+<p>  Need (потребность), Vacancy, Invitation (обязательная вилка ЗП),</p>
+<p>  Application. Инвариант ТЗ: <code class="mono">salary_from/to</code> NOT NULL, <code class="mono">from ≤ to</code>,</p>
+<p>  <code class="mono">salary_type</code> обязателен (gross/net подписан в UI).</p>
+<ul><li><b>hunter_core (<code class="mono">ph_core</code>)</b>: ItemTemplate (параметризованный шаблон:</li></ul>
+<p>  генератор экземпляра по seed + детерминированный чекер), TestSession,</p>
+<p>  Answer, AssessmentSnapshot (единственное, что читает матчинг),</p>
+<p>  BetaStat (калибровка сложности).</p>
+<ul><li><b>fsp_registry</b>: stateless детерминированный генератор</li></ul>
+<p>  <code class="mono">FspProfile(fsp_id, rating, ranks, contests, events)</code>; БД не нужна.</p>
+<h3>Стек</h3>
+<p>Python 3.13 + FastAPI + Pydantic v2 + SQLAlchemy 2 (async) + Alembic,</p>
+<p>pytest, ruff; numpy для IRT-математики; LLM — OpenRouter (open-weights</p>
+<p>модель Qwen-класса) с детерминированным fallback. Frontend: Next.js</p>
+<p>16.3.1 (App Router, React Compiler), Bun, Tailwind v4, Base UI,</p>
+<p>zustand, ky, biome, архитектура FSD (<code class="mono">src/fsd/*</code>). Айдентика ФСП —</p>
+<p>точные токены из брендбука (<code class="mono">accent #402FFF</code>, <code class="mono">ink #1B1C21</code>, Inter +</p>
+<p>JetBrains Mono), тема — сменяемый слой (<code class="mono">tokens.fsp.css</code>).</p></div>
+<div class="section"><h1>2. Запуск и развёртывание</h1><h2>Запуск и развёртывание PirateHunter</h2>
+<p>Живой сервис: <b>https://piratehunter.fun</b>. Инфраструктура: Docker +</p>
+<p>docker-compose + Caddy (авто-TLS). Вся система поднимается одной</p>
+<p>командой на чистой машине.</p>
+<h3>Локальный запуск (docker compose)</h3>
+<p>Требования: Docker с плагином compose, ~4 ГБ свободной RAM.</p>
+<pre>cp .env.example .env        # 1. секреты/конфиг (дефолты рабочие для dev)
+docker compose --env-file .env up -d --build   # 2. всё: 4 сервиса + PG×2 + Redis
+./scripts/seed.sh           # 3. эталонные демо-данные (302 кандидата, 16 компаний, …)</pre>
+<p>Проверка health:</p>
+<pre>curl localhost:64844/health    # backend
+curl localhost:51457/health    # core-api
+curl localhost:52457/health    # fsp-registry
+curl localhost:56151/          # frontend
+curl localhost:52457/fsp/v1/profiles/fsp_001   # синтетический профиль ФСП (или 404)</pre>
+<p>OpenAPI backend — http://localhost:64844/docs (при <code class="mono">BACK_ENV=local</code>).</p>
+<p>Вход по email-коду: без SMTP код пишется в лог backend</p>
+<p>(<code class="mono">docker compose logs -f backend</code>, поле <code class="mono">dev_code</code>). При</p>
+<p><code class="mono">BACK_AUTH_DEV_LOGIN=1</code> (dev-дефолт) на <code class="mono">/login</code> — кнопка входа</p>
+<p>демо-аккаунтами без почты: <code class="mono">candidate</code>, <code class="mono">candidate-fsp</code>, <code class="mono">employer</code>.</p>
+<p>Порты в dev опубликованы на <code class="mono">127.0.0.1</code>: 56151 (frontend), 64844</p>
+<p>(backend), 51457 (core-api), 52457 (fsp-registry), 55432/55433 (PG),</p>
+<p>56379 (Redis) — для отладки и смоука.</p>
+<h3>Скрипты scripts/</h3>
+<table><thead><tr><th>Скрипт</th><th>Что делает</th></tr></thead><tbody><tr><td><code class="mono">./scripts/reset-dev.sh</code></td><td>Стенд в чистое состояние: стоп backend/core, пересоздание схем <code class="mono">ph_back</code>/<code class="mono">ph_core</code> (DROP SCHEMA), подъём стека, дожди health. <b>Данные стираются.</b></td></tr><tr><td><code class="mono">./scripts/seed.sh</code></td><td>Ресед эталона (PRD §10) одной командой: детерминированный seed <code class="mono">piratehunter-v1</code>, truncate доменных таблиц + очистка снапшотов в core. Перед защитой/после тестов жюри база возвращается к эталону.</td></tr><tr><td><code class="mono">./scripts/smoke.sh</code></td><td>Живой сквозной смоук по HTTP (14 шагов): health → dev-login → email-код → профиль → CAT-тест → потребность → shortlist → скрытость контактов → приглашение с вилкой → accept → OIDC-флоу FSP ID → LLM-парсинг → экспресс-тест → рынок вилок. Требует поднятый стек, <code class="mono">curl</code>, <code class="mono">jq</code>.</td></tr></tbody></table>
+<p>Воспроизводимый цикл: <code class="mono">reset-dev.sh</code> → <code class="mono">smoke.sh</code> (зелёный) → <code class="mono">seed.sh</code>.</p>
+<h3>Деплой на VPS (prod)</h3>
+<p>Целевой стенд: VPS 2 vCPU / 4 ГБ RAM, Ubuntu + Docker + compose-плагин.</p>
+<p>В рантайме стек потребляет ~1.5 ГБ — VPS намеренно **не собирает</p>
+<p>образы** (сборка Next.js и pip/uv-зависимостей не влезла бы в RAM и</p>
+<p>заняла бы десятки минут): образы собираются на домашней машине и</p>
+<p>переносятся готовыми.</p>
+<h4>Подготовка (один раз)</h4>
+<ol><li><b>DNS:</b> A-записи <code class="mono">piratehunter.fun</code> (и <code class="mono">www.</code>) → IP VPS. Для</li></ol>
+<p>   мок-OIDC — поддомен <code class="mono">fsp-id.piratehunter.fun</code> → тот же IP.</p>
+<ol><li><b>На VPS:</b></li></ol>
+<p>   ```bash</p>
+<p>   ufw allow 80,443/tcp &amp;&amp; ufw enable      # Caddy выпускает TLS (HTTP-01)</p>
+<p>   # ssh-ключ, docker, compose-плагин</p>
+<p>   git clone &lt;repo&gt; piratehunter &amp;&amp; cd piratehunter</p>
+<p>   cp .env.example .env                     # прод-значения (см. ниже)</p>
+<p>   ```</p>
+<h4>Прод-.env (отличия от dev)</h4>
+<pre>BACK_ENV=prod                 # /docs закрыт
+BACK_AUTH_DEV_LOGIN=0         # dev-login выключен
+NEXT_PUBLIC_DEV_LOGIN=0
+BACK_JWT_SECRET=&lt;длинная случайная строка&gt;
+BACK_CORS_ORIGINS=https://piratehunter.fun
+BACK_FSP_PUBLIC_URL=https://fsp-id.piratehunter.fun
+BACK_FSP_REDIRECT_URI=https://piratehunter.fun/api/v1/auth/fsp/callback
+BACK_FRONT_URL=https://piratehunter.fun
+# SMTP (коды на почту): BACK_SMTP_HOST/PORT/USER/PASSWORD/FROM</pre>
+<p>В <code class="mono">Caddyfile</code> заменить <code class="mono">piratehunter.example.com</code> → <code class="mono">piratehunter.fun</code></p>
+<p>и раскомментировать блок <code class="mono">fsp-id.*</code> (мок-OIDC наружу). Важно:</p>
+<p>Caddyfile примонтирован файлом — после правок</p>
+<p><code class="mono">docker compose ... up -d --force-recreate caddy</code>.</p>
+<h4>Перенос образов и старт</h4>
+<pre># На домашней машине (сборка):
+docker compose --env-file .env build
+docker save $(docker compose --env-file .env config --images) | \
+  ssh vps &#x27;docker load&#x27;
+
+# На VPS:
+docker compose --env-file .env up -d     # без --build: образы уже загружены
+docker compose ps                        # все healthy
+./scripts/seed.sh                        # эталонные демо-данные</pre>
+<p>Caddy сам выпускает и продлевает сертификаты Let&#x27;s Encrypt (HTTP-01,</p>
+<p>порты 80/443), редиректит HTTP→HTTPS, проксирует сайт на frontend, а</p>
+<p><code class="mono">/api/v1</code> — на backend. core-api наружу не торчит (PRD §4.2).</p>
+<h4>Ресед эталона одной командой</h4>
+<pre>./scripts/seed.sh     # truncate + детерминированная заливка (seed piratehunter-v1)</pre>
+<p>Сводка эталона: 302 кандидата (подтверждённый грейд — 229 ≈ 76%, с</p>
+<p>историей ФСП — 181 ≈ 60%), 16 компаний, 6 потребностей, 40 приглашений,</p>
+<p>в ранжировании категории backend×middle — 19 кандидатов.</p>
+<h3>Тестирование развёртывания</h3>
+<p>Смоук (<code class="mono">scripts/smoke.sh</code>) бьёт по <code class="mono">localhost</code>-портам; на проде</p>
+<p>достаточно ручного прохода сквозного сценария из PRD §1 на</p>
+<p><code class="mono">https://piratehunter.fun</code> + health-чеков. Подробнее — TESTING.md.</p></div>
+<div class="section"><h1>3. Тестирование</h1><h2>Тестирование PirateHunter</h2>
+<p>Покрытие трёх слоёв: (1) юнит- и API-тесты каждого сервиса на pytest,</p>
+<p>(2) живой сквозной смоук <code class="mono">scripts/smoke.sh</code> по HTTP по поднятому</p>
+<p>docker-стеку, (3) браузерные E2E-проверки фронта. Плюс воспроизводимый</p>
+<p>цикл «reset → smoke → seed» и детерминированные сиды.</p>
+<h3>1. Автотесты (pytest)</h3>
+<p>Цифры — фактические прогоны <code class="mono">pytest -q</code> в каждом сервисе (11.10.2026):</p>
+<table><thead><tr><th>Сервис</th><th>Тестов</th><th>Как гоняются</th><th>Что покрывают</th></tr></thead><tbody><tr><td>hunter_core</td><td><b>75</b></td><td>чистый pytest, без сети и БД</td><td>CAT-движок (θ-обновление, стоп-правила, исходы confirmed/upgrade/downgrade), скоринг и explanation, fsp_score, стек-матчинг, свежесть, каталог, фабрики шаблонов (генерация экземпляров + чекеры), валидационный харнесс</td></tr><tr><td>backend</td><td><b>110</b></td><td>pytest + aiosqlite, core/fsp клиенты мокаются без сети</td><td>auth (email-код, dev-login, refresh-cookie), роли и зависимости, профили, правила видимости контактов (скрыто до accept), приглашения (вилка обязательна — 422 без неё), снапшоты в core, FSP-привязка (включая 404 «нет истории»), кулдауны грейда (409), каталог, рынок вилок, резюме</td></tr><tr><td>fsp_registry</td><td><b>17</b></td><td>чистый pytest</td><td>детерминированный генератор профилей (~60/40 история/404), мок-OIDC (authorize → code → token → userinfo, одноразовость кода, TTL, невалидный client/redirect)</td></tr></tbody></table>
+<p>Итого <b>202 теста</b>, все зелёные. Запуск:</p>
+<pre>cd backend       &amp;&amp; uv run pytest -q &amp;&amp; uv run ruff check .
+cd hunter_core   &amp;&amp; uv run pytest -q &amp;&amp; uv run ruff check .
+cd fsp_registry  &amp;&amp; uv run pytest -q &amp;&amp; uv run ruff check .</pre>
+<p>Фронт: <code class="mono">cd frontend &amp;&amp; bun run lint &amp;&amp; bun run build</code> (biome + tsc +</p>
+<p>прод-сборка Next.js). Кейс «404 = нет истории ФСП» в живом контуре</p>
+<p>проверяется вручную демо-аккаунтом <code class="mono">candidate</code> (см. FSP-INTEGRATION.md).</p>
+<p>Точечные приёмы: backend гоняется на aiosqlite (паттерн piratepitch) —</p>
+<p>миграции и репозиторный слой без поднятия PG; core/fsp клиенты</p>
+<p>подменяются фейками, внешних вызовов в тестах нет.</p>
+<h3>2. Живой сквозной смоук — scripts/smoke.sh</h3>
+<p>14 шагов по реальному стеку (<code class="mono">docker compose up</code>), каждый — HTTP-вызов</p>
+<p>с проверкой результата (<code class="mono">curl</code> + <code class="mono">jq</code>), стоп по первому FAIL:</p>
+<ol><li><b>Health всех сервисов</b> — backend/core-api/fsp-registry <code class="mono">/health</code> + frontend <code class="mono">/</code> и <code class="mono">/login</code>.</li><li><b>Dev-login</b> — демо-аккаунты <code class="mono">candidate-fsp</code> (кандидат с ФСП) и <code class="mono">employer</code>, получение JWT.</li><li><b>Email-код</b> — <code class="mono">auth/email/request</code> → <code class="mono">dev_code</code> (при <code class="mono">BACK_ENV=local</code> без SMTP) → <code class="mono">auth/email/verify</code> → токен.</li><li><b>Профиль кандидата</b> — PUT <code class="mono">/candidate/profile</code> (стек, специализация, заявленный грейд, контакты).</li><li><b>CAT-тест через backend → core-api</b> — старт сессии на middle, цикл ответов до результата <code class="mono">{theta, grade_verified, outcome}</code>.</li><li><b>Компания + потребность</b> — PUT <code class="mono">/employer/company</code>, POST <code class="mono">/employer/needs</code> (backend проксирует LLM-парсинг «мы поняли так»).</li><li><b>Shortlist</b> — GET <code class="mono">/employer/needs/{id}/shortlist</code>: непустая подборка, у каждой строки есть <code class="mono">explanation</code>.</li><li><b>Скрытость контактов</b> — наш кандидат в банке, <code class="mono">contacts: null</code> до accept (privacy-правило §7.6).</li><li><b>Приглашение</b> — без вилки → <b>422</b>; с вилкой 250–350k gross → 201 (инвариант ТЗ).</li><li><b>Accept</b> — кандидат: до accept контакты компании скрыты, после accept раскрываются <b>обеим</b> сторонам (кандидат видит HR-контакты, работодатель — email кандидата).</li><li><b>Полный OIDC-флоу «FSP ID»</b> — redirect-цепочка: <code class="mono">authorize_url</code> → 303 реестра (code+state) → GET-callback на origin фронта → 303 на <code class="mono">/login/callback</code> с refresh-cookie <code class="mono">ph_refresh</code> → <code class="mono">/auth/refresh</code> → access; <code class="mono">users/me</code> подтверждает <code class="mono">fsp_id=fsp_001</code>.</li><li><b>LLM-парсинг потребности</b> — <code class="mono">needs/parse</code> распознаёт «мидла на FastAPI, PG, Redis» → spec=backend, grade=middle (работает и без ключа — детерминированный fallback).</li><li><b>Экспресс-режим теста (для жюри)</b> — mode=express завершается ≤ 4 вопросов, <code class="mono">mode=express</code> в результате.</li><li><b>Рынок вилок</b> — <code class="mono">market/salary?spec=backend&amp;grade=middle</code>: медиана по потребностям и приглашениям платформы (p50 from=250000, to=350000 на эталонном сиде).</li></ol>
+<p>Финал: «СМОУК ПРОЙДЕН — все 14 шагов зелёные».</p>
+<h3>3. Воспроизводимость</h3>
+<pre>./scripts/reset-dev.sh   # чистые схемы ph_back/ph_core, стек переподнят, health зелёный
+./scripts/smoke.sh       # 14 шагов — зелёные
+./scripts/seed.sh        # эталон piratehunter-v1: 302 кандидата / 16 компаний / 6 потребностей / 40 приглашений</pre>
+<p>Сиды детерминированы (seed <code class="mono">piratehunter-v1</code>), датасет воспроизводим</p>
+<p>побайтово — перед защитой и после тестов жюри база возвращается к</p>
+<p>эталонному состоянию одной командой.</p>
+<h3>4. E2E браузерные проверки фронта</h3>
+<p>Фронт (Next.js 16, FSD) проверяется в браузере по сквозному сценарию</p>
+<p>PRD §1: лендинг → логин (email-код / «Войти через FSP ID» / dev-кнопка)</p>
+<p>→ онбординг кандидата → адаптивный тест с таймером → экран категории →</p>
+<p>ЛК работодателя: потребность → «мы поняли так» → подборка с панелью</p>
+<p>«Почему в подборке» → приглашение с вилкой → инбокс кандидата с вилкой</p>
+<p>крупно → accept → раскрытие контактов. Проверяются money-экраны PRD</p>
+<p>§7.11 (подборка с explanation и виджетом «вилка vs рынок», тест,</p>
+<p>приглашение, категория). Кабинеты фазы 1 на моках</p>
+<p>(<code class="mono">NEXT_PUBLIC_API_MOCK=1</code>), auth — всегда живая.</p>
+<h3>Что осознанно не автоматизировано</h3>
+<p>Песочница исполнения code-заданий и прокторинг — плюс, не MVP (Q&amp;A</p>
+<p>06.10); code-шаблоны заложены в модель, при нехватке времени выкидываются</p>
+<p>без потери баллов. Нагрузочное тестирование не требуется оценкой (десятки</p>
+<p>пользователей, подборка &lt; 2 c на 300+ кандидатах по снапшотам).</p></div>
+<div class="section"><h1>4. Валидация</h1><h2>Валидация решения (PRD §9)</h2>
+<p>Собственная процедура валидации (ТЗ §2, критерий «Тестирование +</p>
+<p>валидация + категоризация», 25%). Эталонных датасетов нет — построен</p>
+<p>синтетический контур: синтетические агенты-кандидаты с известным</p>
+<p>истинным уровнем, ручная разметка набора «потребность × кандидаты».</p>
+<p>Харнесс — CLI в <code class="mono">hunter_core/validation/</code>, артефакты прогона —</p>
+<p><code class="mono">hunter_core/out/validation/</code>.</p>
+<h3>Методология</h3>
+<p><b>Синтетические агенты (§9.1).</b> Агент с истинным уровнем <code class="mono">θ_true</code></p>
+<p>отвечает верно с вероятностью <code class="mono">P = σ(θ_true − β)</code> по логистической</p>
+<p>модели IRT (β — сложность шаблона), плюс шум по времени ответа. Агенты</p>
+<p>равномерно покрывают шкалу θ. Контрольный прогон: **60 агентов × 2</p>
+<p>повторных теста**, режим full (10 вопросов), специализация backend,</p>
+<p>банк [28, 28] шаблонов по повторам, seed 42. Дополнительно выполнен</p>
+<p>полный прогон <b>300 агентов × 3 повтора</b> (итоги ниже).</p>
+<p><b>Метрики (§9.2).</b></p>
+<ol><li>Стабильность: повторные тесты агента → % точного совпадения грейда, % в пределах ±1 грейда.</li><li>Дискриминативность: монотонность медиан присвоенного θ по полосам θ_true; Spearman(θ_true, θ_est); confusion-матрица; путаница соседних грейдов.</li><li>Эквивалентность экземпляров: для каждого шаблона разброс доли верных ответов по 50 seeds — доля seeds вне 95% биномиального ДИ (проверка, что параметризация по seed не меняет сложность).</li><li>Калибровка β: сходимость BetaStat (метод моментов по доле верных с поправкой на θ ответивших, демпфирование) к эмпирической сложности.</li><li>Релевантность подбора: ручная разметка 20 пар «потребность × 50 кандидатов» → Precision@5, nDCG@10.</li><li>Пересечение наборов заданий между сессиями (антислив, Jaccard).</li></ol>
+<h3>Пороги приёмки (§9.3) — зафиксированы до прогона</h3>
+<table><thead><tr><th>Метрика</th><th>Порог</th></tr></thead><tbody><tr><td>Стабильность: точное совпадение грейда</td><td>≥ 80%</td></tr><tr><td>Стабильность: в пределах ±1 грейда</td><td>≥ 97%</td></tr><tr><td>Spearman(θ_true, θ_est)</td><td>≥ 0.85</td></tr><tr><td>Путаница соседних грейдов</td><td>&lt; 15%</td></tr><tr><td>Доля seeds вне ДИ (эквивалентность экземпляров)</td><td>≤ 15%</td></tr><tr><td>Ошибка калибровки β</td><td>≤ 0.3</td></tr><tr><td>Precision@5 на размеченном наборе</td><td>≥ 0.8</td></tr></tbody></table>
+<h3>Результаты контрольного прогона (60 агентов × 2 повтора)</h3>
+<p>Источник: <code class="mono">hunter_core/out/validation/summary.txt</code>,</p>
+<p><code class="mono">validation.json</code>, <code class="mono">matching.json</code>.</p>
+<table><thead><tr><th>Метрика</th><th>Факт</th><th>Порог</th><th>Вердикт</th></tr></thead><tbody><tr><td>Стабильность грейда, точное совпадение</td><td><b>96.7%</b></td><td>≥ 80%</td><td>PASS</td></tr><tr><td>Стабильность, в пределах ±1</td><td><b>100.0%</b></td><td>≥ 97%</td><td>PASS</td></tr><tr><td>Spearman(θ_true, θ_est)</td><td><b>0.9718</b></td><td>≥ 0.85</td><td>PASS</td></tr><tr><td>Путаница соседних грейдов</td><td><b>1.7%</b></td><td>&lt; 15%</td><td>PASS</td></tr><tr><td>Доля seeds вне 95% ДИ</td><td><b>4.2%</b> (битых экземпляров: 0)</td><td>≤ 15%</td><td>PASS</td></tr><tr><td>Ошибка калибровки β (BetaStat)</td><td><b>0.125</b> (β 1.2 → 0.474 при эмпирической 0.349)</td><td>≤ 0.3</td><td>PASS</td></tr><tr><td>Precision@5 (20 потребностей × 50 кандидатов)</td><td><b>0.85</b></td><td>≥ 0.8</td><td>PASS</td></tr><tr><td>nDCG@10</td><td>0.9446</td><td>—</td><td>—</td></tr><tr><td>Пересечение наборов шаблонов (Jaccard, 1770 пар сессий)</td><td>0.305</td><td>—</td><td>низкое — антислив работает</td></tr></tbody></table>
+<p>Медианы присвоенного θ_est по полосам θ_true <b>монотонны</b>:</p>
+<p>intern −2.233 &lt; junior −0.109 &lt; middle 1.226 &lt; senior 2.973.</p>
+<p><b>Confusion-матрица</b> (строки — истинный грейд, столбцы — присвоенный;</p>
+<p>точность строк: intern 100.0% (n=30), junior 96.7% (n=30), middle 96.7%</p>
+<p>(n=30), senior 100.0% (n=30)):</p>
+<pre>            присвоенный
+          intern  junior  middle  senior
+intern      30       0       0       0
+junior       0      29       1       0
+middle       0       1      29       0
+senior       0       0       0      30</pre>
+<p>Графики прогона:</p>
+<ul><li><a href="../hunter_core/out/validation/confusion.png">confusion.png</a> — confusion-матрица «истинный × присвоенный» грейд;</li><li><a href="../hunter_core/out/validation/theta_scatter.png">theta_scatter.png</a> — рассеяние θ_est от θ_true с полосами грейдов.</li></ul>
+<p>Эквивалентность экземпляров проверена на 10 шаблонах × 50 seeds × 100</p>
+<p>агентов (θ = 1.0): средняя доля seeds вне ДИ 4.2%, битых экземпляров</p>
+<p>(генератор/чекер не сошлись) — 0. Правило релевантности в подборе:</p>
+<p>«spec совпал И grade ≥ требуемого И stack_overlap ≥ 0.5» — разметка</p>
+<p>команды, набор и результаты по потребностям — в <code class="mono">matching.json</code></p>
+<p>(per-need Precision@5 0.6–1.0, overall_pass=true).</p>
+<h3>Полный прогон (300 агентов × 3 повтора)</h3>
+<p>По итогам полного прогона (PRD §14, фаза 0): стабильность грейда</p>
+<p><b>99%</b> (точное совпадение), Spearman <b>0.977</b> — пороги §9.3</p>
+<p>выполнены с запасом.</p>
+<h3>Итог</h3>
+<p><b>ИТОГ: PASS</b> — все пороги §9.3 выполнены, шесть из шести</p>
+<p>валидационных проверок зелёные, плюс метрики подбора. Пороги грейдов</p>
+<p>(intern &lt; −1 ≤ junior &lt; 0.5 ≤ middle &lt; 2 ≤ senior) калиброваны этими</p>
+<p>прогонами; жюри может само пройти пилот экспресс-режимом (4 вопроса,</p>
+<p>3–5 минут) и сверить присвоение грейда.</p></div>
+<div class="section"><h1>5. Механика подбора</h1><h2>Механика подбора (PRD §7.5)</h2>
+<p>Критерий «Механика подбора» — 35% оценки. Подбор — внутри core-api,</p>
+<p>работает только по оценочным снапшотам (privacy by design, PRD §4.3);</p>
+<p>backend применяет фильтры до скоринга и правила видимости после.</p>
+<h3>Формула скоринга</h3>
+<pre>score = 0.40·test_score + 0.30·stack_match + 0.20·fsp_score + 0.10·freshness</pre>
+<p>Реализация: <code class="mono">hunter_core/engine/scoring.py</code> (<code class="mono">match_score</code>), веса —</p>
+<p><code class="mono">DEFAULT_WEIGHTS</code> (конфигурируемы).</p>
+<p><b>Обоснование порядка весов.</b> Подтверждённая тестом компетентность</p>
+<p>(0.40) важнее самоописанного стека (0.30): грейд присваивается только</p>
+<p>адаптивным тестом (Q&amp;A 07.10), стек — декларация кандидата. Достижения</p>
+<p>ФСП (0.20) — верифицированный внешний сигнал, усиливают ранжирование</p>
+<p><b>внутри</b> категории, но не влияют на грейд (обязательное правило Q&amp;A).</p>
+<p>Свежесть (0.10) — мягкий буст активных профилей, чтобы выдача не</p>
+<p>застаивалась.</p>
+<h3>Факторы</h3>
+<h4>test_score (0.40)</h4>
+<p>Позиция θ внутри θ-полосы грейда: <code class="mono">(θ − lo) / (hi − lo)</code>, кламп 0..1.</p>
+<p>Полосы: intern [−4, −1), junior [−1, 0.5), middle [0.5, 2), senior</p>
+<p>[2, 4]. В снапшоте может прийти готовое значение (<code class="mono">test_score: null</code> =</p>
+<p>вычисли из θ).</p>
+<p><b>Unverified-потолок 0.4.</b> Кандидат без подтверждённого грейда</p>
+<p>показывается <b>со статусом «не подтверждён»</b> и опускается в выдаче</p>
+<p>(потолок test_score = 0.4), но <b>не скрывается</b> — иначе выпадает из</p>
+<p>оборота (Q&amp;A 06.10). Реализация — <code class="mono">UNVERIFIED_CAP = 0.4</code>,</p>
+<p>explanation помечает «(не подтверждён — потолок 0.4)».</p>
+<h4>stack_match (0.30)</h4>
+<p><code class="mono">Σ w(совпавший навык)</code>: совпадение по must весит ×3, nice ×1;</p>
+<p>нормировка <code class="mono">3·|must| + |nice|</code> к 0..1; регистронезависимо; пересечение</p>
+<p>must∩nice считается must. Пустые требования → 0.0 (нет сигнала, а не</p>
+<p>штраф). Совпадение — точное по тегам стека снапшота.</p>
+<h4>fsp_score (0.20)</h4>
+<p>Считается backend&#x27;ом по достижениям ФСП (PRD §7.9, критерии — по Q&amp;A</p>
+<p>06.10/07.10), в core приходит готовым в снапшоте:</p>
+<table><thead><tr><th>Достижение</th><th>Вес</th></tr></thead><tbody><tr><td>Победитель (1 место)</td><td>1.0</td></tr><tr><td>Диплом I–III степени</td><td>0.7</td></tr><tr><td>Призовое место (4–10)</td><td>0.5</td></tr><tr><td>Участие (11+)</td><td>0.15</td></tr><tr><td>Мероприятие (роль/эксперт)</td><td>0.05</td></tr></tbody></table>
+<ul><li><b>Дисциплины и уровни соревнований не ранжируются</b> — «все</li></ul>
+<p>  соревнования равно важны» (Q&amp;A 06.10). Считаем результативность и</p>
+<p>  число.</p>
+<ul><li><b>Антифарм-затухание явками</b>: i-е участие даёт <code class="mono">×0.5^(i−1)</code> к весу</li></ul>
+<p>  участия (0.15, 0.075, 0.0375, …), мероприятия — аналогично. Защита</p>
+<p>  от набивания профиля одними онлайн-явками. Результативные достижения</p>
+<p>  (1.0/0.7/0.5) затуханию не подвержены.</p>
+<ul><li><b>Cap 1.0.</b> Нет истории ФСП → 0, штрафа сверх веса нет.</li><li>Командные результаты учитываются как обычные достижения (вклад честно</li></ul>
+<p>  не выделить — Q&amp;A). Давность не штрафуем (архива на 2–4 года нет).</p>
+<ul><li>Опционально post-MVP (заложено в модель): небольшой бонус за</li></ul>
+<p>  релевантность дисциплины специализации кандидата.</p>
+<h4>freshness (0.10)</h4>
+<p>Экспоненциальное затухание от последней активности (тест / задание /</p>
+<p>обновление профиля): <code class="mono">0.5^(days / 30)</code> — полураспад 30 дней. Нет данных</p>
+<p>об активности → 0.0.</p>
+<h3>Конвейер подборки (<code class="mono">POST /internal/match</code>)</h3>
+<ol><li>Фильтры работодателя (spec, grade, стек, «есть ФСП») — <b>до</b></li></ol>
+<p>   скоринга (PRD §7.5.2).</p>
+<ol><li>Снапшоты специализации сплитятся:</li></ol>
+<ul><li><b>Категория</b> (<code class="mono">in_category=true</code>): <code class="mono">grade_verified</code> есть и</li></ul>
+<p>     ≥ требуемому грейду. Скоринг полной формулой, сортировка по score.</p>
+<ul><li><b>«Рядом с запросом»</b> (<code class="mono">in_category=false</code>): грейд ниже</li></ul>
+<p>     требуемого или не подтверждён — те же снапшоты, тот же score, но</p>
+<p>     отдельным блоком после категории. Категорийность не ломается,</p>
+<p>     находчивость добавляется.</p>
+<ol><li><code class="mono">core + near</code>, top-<code class="mono">limit</code> (default 20), детерминированный тай-брейк</li></ol>
+<p>   по <code class="mono">candidate_id</code>.</p>
+<ol><li>Backend джойнит профили, применяет видимость контактов (только после</li></ol>
+<p>   accept) и отдаёт фронту.</p>
+<h3>Ранжирование внутри категории (§7.5.4)</h3>
+<p><code class="mono">GET /internal/category/{spec}/{grade}/ranking</code> — тот же score в режиме</p>
+<p>просмотра категории <b>без потребности</b>: stack-фактор заменяется</p>
+<p>нейтральной константой <code class="mono">NEUTRAL_STACK_VALUE = 0.5</code> (его вклад 0.30·0.5</p>
+<p>одинаков для всех — не влияет на порядок, честно отражён в explanation:</p>
+<p>«стек: нейтральная константа»). Выше оказываются сильнее подтверждённые</p>
+<p>(θ в полосе) профили с достижениями ФСП — формулировка ТЗ §2.</p>
+<h3>Объяснимость (§7.5.3) — обязательный артефакт</h3>
+<p>Каждая строка выдачи несёт <code class="mono">explanation</code> — разложение по 4 факторам в</p>
+<p>порядке весов: <code class="mono">{factor, weight, value, contribution, human_text}</code>.</p>
+<p>Примеры <code class="mono">human_text</code>:</p>
+<ul><li>«тест: грейд middle, θ=1.20 → 0.47»</li><li>«стек: совпало must 4/5, nice 2/3 → 0.76»</li><li>«достижения ФСП: суммарный счёт 0.72»</li><li>«свежесть профиля: активность 3 дн. назад → 0.93»</li></ul>
+<p>Фронт рендерит панель «Почему в подборке» — прямое попадание в критерий</p>
+<p>«обоснованность ранжирования и объяснимость выдачи».</p>
+<h3>Рыночная аналитика вилок (§7.5.5)</h3>
+<p>Раз ЗП обязательна и прозрачна (ТЗ §2.2.1), принцип превращён в фичу:</p>
+<p><code class="mono">GET /api/v1/employer/market/salary?spec&amp;grade</code> — виджет «вилка vs</p>
+<p>рынок по категории». Агрегат <b>по данным платформы</b> (анонимно):</p>
+<p>перцентили p25/p50/p75 границ вилок потребностей (<code class="mono">sample_needs</code>) и</p>
+<p>приглашений (<code class="mono">sample_invitations</code>) категории spec×grade + размер</p>
+<p>категории из core (<code class="mono">category_size</code>). Пустая выборка → перцентили null,</p>
+<ol><li>Работодатель видит «ваша вилка ниже медианы backend×middle» до</li></ol>
+<p>отправки приглашения. Стоимость реализации — один SQL-агрегат.</p>
+<h3>Схема «потребность → подборка → приглашение»</h3>
+<ol><li>Работодатель описывает потребность свободным текстом →</li></ol>
+<p>   LLM-парсинг <code class="mono">POST /internal/llm/parse-need</code> (`{spec, grade,</p>
+<p>   stack_must, stack_nice, confidence, notes}`; детерминированный</p>
+<p>   keyword-fallback без ключа; невалидные slug&#x27;и → null) → экран «мы</p>
+<p>   поняли так» с правкой → подтверждённая структура идёт в матчинг.</p>
+<ol><li>Shortlist: match по снапшотам → ranked + explanation + блок</li></ol>
+<p>   «рядом с запросом».</p>
+<ol><li>Приглашение конкретному кандидату: текст + **обязательная вилка</li></ol>
+<p>   ЗП** (salary_from/to + salary_type gross/net) + способ связи;</p>
+<p>   вакансия опциональна (ТЗ §2.2). Без вилки — 422.</p>
+<ol><li>Кандидат видит вилку до ответа; статусы</li></ol>
+<p>   <code class="mono">sent → viewed → accepted | declined</code>; после accept контакты</p>
+<p>   раскрываются обеим сторонам.</p></div>
+<div class="section"><h1>6. Интеграция с ФСП</h1><h2>Интеграция с ФСП (мок-реестр + мок-OIDC «FSP ID»)</h2>
+<p>Сервис <code class="mono">fsp_registry</code> играет двойную роль (Q&amp;A 06.10): **мок-реестр</p>
+<p>достижений участника ФСП** (контракт <code class="mono">GET /fsp/v1/profiles/{fsp_id}</code>)</p>
+<p>и <b>мок-провайдер входа «FSP ID»</b> (имитация OAuth/OIDC-флоу). После</p>
+<p>хакатона мок заменяется боевым реестром/Keycloak — backend не меняется,</p>
+<p>меняется только конфиг. Это «схема предполагаемой интеграции» из ТЗ</p>
+<p>§3.4, исполненная в коде.</p>
+<h3>Контракт реестра достижений</h3>
+<pre>GET /fsp/v1/profiles/{fsp_id}
+→ 200 {fsp_id, rating, ranks[{discipline, rank, date}],
+       contests[{name, discipline, date, place, diploma 1|2|3|null,
+                 team, team_result{team_name, place}}],
+       events[{name, date, role}]}
+→ 404 — истории ФСП нет</pre>
+<p><b>Детерминированный генератор</b> (<code class="mono">fsp_registry/app/profiles/service.py</code>):</p>
+<p>seed = <code class="mono">sha256(соль + fsp_id)</code> — один и тот же <code class="mono">fsp_id</code> всегда даёт один</p>
+<p>и тот же профиль, в том числе между перезапусками. По хэшу **~60%</p>
+<p>fsp_id имеют историю, ~40% → 404** (пользователь без истории —</p>
+<p>обязательный кейс ТЗ). Распределение результатов: ~20% победители с</p>
+<p>дипломом I–III, ~25% призовые места 4–10, остальные участники; ~35%</p>
+<p>командных; рейтинг, разряды (0–3 дисциплины), мероприятия (0–4).</p>
+<p>Поле <code class="mono">level</code> (regional/national) сознательно не заводим — эксперты</p>
+<p>против ранжирования дисциплин и уровней (§7.9). Сервис stateless, БД</p>
+<p>не нужна. ПДн не хранит — «человекочитаемость» обеспечивает backend</p>
+<p>(у себя маппинг <code class="mono">fsp_id → candidate_id</code>).</p>
+<h3>Мок-OIDC flow входа «FSP ID»</h3>
+<p>Контракт приближен к OIDC, чтобы переезд на боевой Keycloak был</p>
+<p>конфигом. Эндпоинты fsp_registry:</p>
+<table><thead><tr><th>Метод</th><th>Путь</th><th>Назначение</th></tr></thead><tbody><tr><td>GET</td><td><code class="mono">/oidc/authorize?client_id&amp;redirect_uri&amp;state&amp;login_hint</code></td><td>авторизация: автовыбор демо-личности или явный <code class="mono">fsp_id</code>; 303 на redirect_uri с <code class="mono">code+state</code></td></tr><tr><td>POST</td><td><code class="mono">/oidc/token</code> (form)</td><td>обмен кода: <code class="mono">{access_token, id_token, expires_in}</code> — self-contained JWT HS256</td></tr><tr><td>GET</td><td><code class="mono">/oidc/userinfo</code> (Bearer)</td><td><code class="mono">{sub=fsp_id, name, email}</code></td></tr><tr><td>GET</td><td><code class="mono">/.well-known/openid-configuration</code></td><td>discovery (issuer = browser-facing адрес)</td></tr></tbody></table>
+<p>Коды одноразовые, in-memory с TTL; <code class="mono">client_id</code> валидируется,</p>
+<p><code class="mono">redirect_uri</code> — по allowlist; обмен привязан к паре code+redirect_uri</p>
+<p>+client_id (повторный обмен → <code class="mono">invalid_grant</code>).</p>
+<h4>Redirect-цепочка (как это проходит в браузере)</h4>
+<ol><li>Фронт: <code class="mono">GET /api/v1/auth/fsp/authorize?fsp_id=…</code> → backend отдаёт</li></ol>
+<p>   <code class="mono">{authorize_url}</code> — browser-facing адрес реестра</p>
+<p>   (<code class="mono">BACK_FSP_PUBLIC_URL</code>), OIDC-параметрами (<code class="mono">client_id</code>,</p>
+<p>   <code class="mono">redirect_uri</code>, <code class="mono">state</code>, <code class="mono">login_hint</code> = fsp_id).</p>
+<ol><li>Браузер идёт на <code class="mono">/oidc/authorize</code> → реестр <b>303</b>-ит на</li></ol>
+<p>   <code class="mono">BACK_FSP_REDIRECT_URI</code> = <b>GET-callback backend&#x27;а на origin фронта</b></p>
+<p>   (<code class="mono">https://piratehunter.fun/api/v1/auth/fsp/callback?code&amp;state</code>) —</p>
+<p>   Next проксирует <code class="mono">/api/*</code>, поэтому refresh-cookie <code class="mono">ph_refresh</code></p>
+<p>   ставится на домен фронта.</p>
+<ol><li>Backend валидирует одноразовый state (Redis, TTL 600 с), обменивает</li></ol>
+<p>   <code class="mono">code → token → userinfo</code> у реестра, создаёт/находит User по</p>
+<p>   <code class="mono">fsp_id</code>, подтягивает достижения, <b>303</b>-ит браузер на</p>
+<p>   <code class="mono">/login/callback</code>.</p>
+<ol><li>Сессия поднимается bootstrap-ом: <code class="mono">/api/v1/auth/refresh</code> по</li></ol>
+<p>   <code class="mono">ph_refresh</code>-cookie → access в память (zustand), single-flight</p>
+<p>   refresh в ky.</p>
+<ol><li>POST-вариант callback (code+state в теле) оставлен для API-клиентов.</li></ol>
+<p>Сквозной флоу покрыт смоуком (шаг 11): authorize_url → 303 (code+state)</p>
+<p>→ callback → 303 <code class="mono">/login/callback</code> → cookie → refresh → <code class="mono">users/me</code> с</p>
+<p><code class="mono">fsp_id=fsp_001</code>.</p>
+<h3>Кейс «404 = нет истории ФСП» (обязательный по ТЗ)</h3>
+<ul><li>Привязка ФСП ID (автоматически при входе через FSP ID или вручную в</li></ul>
+<p>  настройках): <code class="mono">fsp_registry</code> вернул 404 → <code class="mono">fsp_score = 0</code>, блок</p>
+<p>  достижений <b>не рендерится</b>, UI подсказывает «привяжите ФСП ID».</p>
+<ul><li>Кандидат <b>полностью не скрывается</b>: показывается со статусом,</li></ul>
+<p>  участвует в подборке с unverified-потолком test_score (0.4), если</p>
+<p>  грейд подтверждён — в категории на общих основаниях.</p>
+<ul><li>Фильтр работодателя «есть достижения ФСП» корректно исключает таких</li></ul>
+<p>  кандидатов.</p>
+<ul><li>Путь покрыт тестами backend (FSP-привязка с 404, «404 = нет истории →</li></ul>
+<p>  score 0, блок отсутствует»); ручная демонстрация — демо-аккаунт</p>
+<p>  <code class="mono">candidate</code> (без ФСП) против <code class="mono">candidate-fsp</code> (fsp_001 — богатая</p>
+<p>  история). Достижения кэшируются в Redis (TTL 3600 с).</p>
+<h3>Критерии влияния достижений (Q&amp;A 06.10 / 07.10)</h3>
+<ul><li>Достижения ФСП — <b>буст внутри грейда</b> (фактор fsp_score, вес 0.20),</li></ul>
+<p>  на грейд не влияют: грейд присваивается только тестом.</p>
+<ul><li>Дисциплины равны, уровни соревнований не ранжируются.</li><li>Антифарм: затухание повторных явок <code class="mono">×0.5^(i−1)</code>; cap 1.0.</li><li>Командный результат — как обычное достижение; давность не штрафуем.</li><li>Формула и веса — в MATCHING.md; бонус за релевантность дисциплины</li></ul>
+<p>  специализации — опционально post-MVP (модель <code class="mono">discipline</code> заложена).</p>
+<h3>Замена мока на боевой Keycloak — конфигом</h3>
+<p>Backend ходит к провайдеру через интерфейс <code class="mono">IdentityProvider</code></p>
+<p>(провайдеры <code class="mono">fsp-id</code> и <code class="mono">email-code</code>); клиент мок-OIDC параметризован:</p>
+<pre>BACK_FSP_PUBLIC_URL=https://fsp-id.piratehunter.fun   # issuer/authorize
+BACK_FSP_REGISTRY_URL=http://fsp-registry:52457       # внутри сети
+BACK_FSP_REDIRECT_URI=https://piratehunter.fun/api/v1/auth/fsp/callback
+BACK_FSP_CLIENT_ID / BACK_FSP_CLIENT_SECRET           # client-конфиг</pre>
+<p>Переезд: поднять Keycloak с realm ФСП, завести client</p>
+<p>(<code class="mono">piratehunter-backend</code>), поменять три env — код backend&#x27;а не трогаем</p>
+<p>(claims mapping: <code class="mono">sub → fsp_id</code>, standard OIDC). Реестр достижений</p>
+<p>заменяется боевым API с тем же контрактом ответа (200/404).</p></div>
+<div class="section"><h1>7. API</h1><h2>API PirateHunter</h2>
+<p>Открытый REST API платформы — <code class="mono">backend /api/v1</code> (JWT). Спецификация —</p>
+<p>OpenAPI (Swagger UI на <code class="mono">/docs</code> при <code class="mono">BACK_ENV=local/staging</code>, в проде</p>
+<p>закрыт). Канонические контракты версионированы (<code class="mono">/api/v1</code>), auth-слой</p>
+<p>готов к публичному API с ключами (roadmap в конце). Internal API</p>
+<p>core-api (<code class="mono">/internal/*</code>) и fsp_registry (<code class="mono">/fsp/v1</code>, <code class="mono">/oidc/*</code>) наружу не</p>
+<p>выставлены (PRD §4.2) — с ними общается только backend.</p>
+<h3>Аутентификация</h3>
+<p>Три провайдера через интерфейс <code class="mono">IdentityProvider</code>, JWT HS256</p>
+<p>(access короткий + refresh в httpOnly-cookie <code class="mono">ph_refresh</code>):</p>
+<table><thead><tr><th>Метод</th><th>Путь</th><th>Описание</th></tr></thead><tbody><tr><td>POST</td><td><code class="mono">/auth/email/request</code></td><td>код на email (SMTP; без SMTP — в лог, <code class="mono">dev_code</code> при <code class="mono">BACK_ENV=local</code>). TTL 600 с, кулдаун 60 с, 5 попыток, лимиты 10/сут на адрес и 30/сут с IP</td></tr><tr><td>POST</td><td><code class="mono">/auth/email/verify</code></td><td><code class="mono">{email, code}</code> → JWT-пара (роль выбирается при первом входе)</td></tr><tr><td>POST</td><td><code class="mono">/auth/refresh</code></td><td>refresh по cookie → новая access</td></tr><tr><td>POST</td><td><code class="mono">/auth/logout</code></td><td>сброс cookie</td></tr><tr><td>GET</td><td><code class="mono">/auth/fsp/authorize</code></td><td>вход через FSP ID: <code class="mono">{authorize_url}</code> мок-OIDC (login_hint=fsp_id)</td></tr><tr><td>GET/POST</td><td><code class="mono">/auth/fsp/callback</code></td><td>OIDC-callback: GET — browser (на origin фронта), POST — для API-клиентов</td></tr><tr><td>POST</td><td><code class="mono">/auth/dev</code></td><td>dev-login демо-аккаунтами (<code class="mono">candidate</code> / <code class="mono">candidate-fsp</code> / <code class="mono">employer</code>), только <code class="mono">BACK_AUTH_DEV_LOGIN=1</code></td></tr><tr><td>GET</td><td><code class="mono">/users/me</code></td><td>профиль сессии (включая <code class="mono">fsp_id</code>)</td></tr><tr><td>POST</td><td><code class="mono">/users/me/role</code></td><td>выбор роли при онбординге (candidate / employer)</td></tr></tbody></table>
+<p>Чекбоксы при регистрации: согласие на обработку ПДн (152-ФЗ) и</p>
+<p>отдельно на публикацию профиля.</p>
+<h3>Кандидат</h3>
+<table><thead><tr><th>Метод</th><th>Путь</th><th>Описание</th></tr></thead><tbody><tr><td>GET/PUT</td><td><code class="mono">/candidate/profile</code></td><td>профиль: ФИО, контакты, стек, специализация, заявленный грейд, роли, стаж, софт-скиллы, согласия</td></tr><tr><td>POST</td><td><code class="mono">/candidate/profile/resume</code></td><td>загрузка PDF → разбор в черновик профиля (текст обезличивается перед LLM; обязателен ручной review)</td></tr><tr><td>GET</td><td><code class="mono">/candidate/profile/pdf</code></td><td>стандартизированный PDF-профиль в гамме ФСП</td></tr><tr><td>POST/DELETE</td><td><code class="mono">/candidate/fsp-link</code></td><td>привязка/отвязка ФСП ID → достижения + fsp_score + снапшот (404 = нет истории → score 0)</td></tr><tr><td>GET</td><td><code class="mono">/candidate/grade</code></td><td>статус грейда, история тестов, кулдауны (смена грейда 90 дн, повтор теста 30 дн — даты доступности)</td></tr><tr><td>POST</td><td><code class="mono">/tests/sessions</code></td><td>старт CAT-теста `{grade_target, mode: full\</td><td>express}` → первая задача</td></tr><tr><td>POST</td><td><code class="mono">/tests/sessions/{id}/answers</code></td><td>ответ → следующая задача \</td><td>результат <code class="mono">{theta, se, outcome, grade_verified, breakdown}</code></td></tr><tr><td>GET</td><td><code class="mono">/candidate/invitations</code></td><td>входящие приглашения (компания, текст, <b>вилка ЗП</b>, способ связи)</td></tr><tr><td>POST</td><td><code class="mono">/candidate/invitations/{id}/accept</code></td><td>принять → контакты раскрываются обеим сторонам</td></tr><tr><td>POST</td><td><code class="mono">/candidate/invitations/{id}/decline</code></td><td>отклонить</td></tr><tr><td>GET</td><td><code class="mono">/vacancies?filters</code></td><td>опубликованные вакансии (опц. фича)</td></tr><tr><td>POST</td><td><code class="mono">/vacancies/{id}/apply</code></td><td>отклик с сопроводительным</td></tr></tbody></table>
+<h3>Работодатель</h3>
+<table><thead><tr><th>Метод</th><th>Путь</th><th>Описание</th></tr></thead><tbody><tr><td>GET/PUT</td><td><code class="mono">/employer/company</code></td><td>профиль компании</td></tr><tr><td>CRUD</td><td><code class="mono">/employer/needs</code></td><td>потребности (raw_text + структура: spec, grade, stack_must/nice, вилка)</td></tr><tr><td>POST</td><td><code class="mono">/employer/needs/parse</code></td><td>LLM-разбор свободного текста → «мы поняли так» (fallback — keyword)</td></tr><tr><td>GET</td><td><code class="mono">/employer/needs/{id}/shortlist</code></td><td>подборка: ranked кандидаты + explanation + блок «рядом с запросом»</td></tr><tr><td>GET</td><td><code class="mono">/employer/market/salary?spec&amp;grade</code></td><td>виджет «вилка vs рынок»: p25/p50/p75 по данным платформы + размер категории</td></tr><tr><td>GET</td><td><code class="mono">/employer/candidates?spec&amp;grade&amp;stack&amp;fsp&amp;category</code></td><td>банк кандидатов с фильтрами</td></tr><tr><td>POST/GET</td><td><code class="mono">/employer/invitations</code></td><td>приглашения (вилка обязательна — 422 без неё; лимит 100/час на компанию), трекер статусов</td></tr><tr><td>CRUD</td><td><code class="mono">/employer/vacancies</code></td><td>вакансии (вилка обязательна, gross/net подписан)</td></tr><tr><td>GET</td><td><code class="mono">/employer/vacancies/{id}/applications</code></td><td>входящие отклики, смена статусов</td></tr></tbody></table>
+<h3>Справочник и общее</h3>
+<table><thead><tr><th>Метод</th><th>Путь</th><th>Описание</th></tr></thead><tbody><tr><td>GET</td><td><code class="mono">/catalog</code></td><td>7 специализаций × 4 грейда (backend кэширует ответ core, TTL 300 с)</td></tr><tr><td>GET</td><td><code class="mono">/health</code></td><td>healthcheck</td></tr></tbody></table>
+<h3>Формат ошибок</h3>
+<p>Единый стиль: HTTP-код + JSON <code class="mono">{ &quot;detail&quot;: &quot;человекочитаемое описание&quot; }</code>.</p>
+<ul><li><b>422</b> — валидация схемы (Pydantic, тело с деталями полей) или</li></ul>
+<p>  доменная валидация (нет вилки, неизвестный slug специализации);</p>
+<ul><li><b>401/403</b> — нет токена / чужой ресурс или роль не подходит</li></ul>
+<p>  (зависимости FastAPI: кандидат не видит чужие приглашения,</p>
+<p>  работодатель не видит контакты до accept);</p>
+<ul><li><b>404</b> — ресурс не найден (включая «нет истории ФСП» у реестра);</li><li><b>409</b> — конфликт состояния: смена грейда в кулдауне, ФСП ID уже у</li></ul>
+<p>  другого аккаунта;</p>
+<ul><li><b>429</b> — лимиты (коды на email, приглашения);</li><li><b>502</b> — core-api недоступен;</li><li><b>500</b> — <code class="mono">{ &quot;detail&quot;: &quot;внутренняя ошибка: &lt;Type&gt;: &lt;msg&gt;&quot; }</code> (глобальный</li></ul>
+<p>  handler, без стека наружу).</p>
+<h3>ATS-сценарий (roadmap-концепция ТЗ)</h3>
+<p>По определению из ответов 07.10: ATS = «синхронизация вакансий,</p>
+<p>откликов и статусов с внутренней системой найма работодателя через API,</p>
+<p>чтобы платформа встраивалась в существующий процесс, а не требовала</p>
+<p>ручного дублирования». Концепция (в MVP не реализуем, схема зафиксирована):</p>
+<ol><li>Работодатель заводит API-ключ в кабинете; аутентификация</li></ol>
+<p>   <code class="mono">X-API-Key</code> (argon2-хэш ключа, паттерн известен).</p>
+<ol><li>Синхронизация вакансий: <code class="mono">POST /api/v1/employer/vacancies</code> из ATS</li></ol>
+<p>   (или полный обмен по webhook-эндпоинтам ATS).</p>
+<ol><li>Статусы: webhooks платформы по смене статусов приглашений/откликов</li></ol>
+<p>   (<code class="mono">sent → viewed → accepted/declined</code>) + маппинг на типовые этапы</p>
+<p>   ATS-воронки (screening → interview → offer).</p>
+<h3>Roadmap API</h3>
+<ul><li><b>Публичный API с ключами</b> (<code class="mono">/public/v1</code>, паттерн piratepitch):</li></ul>
+<p>  версионирование <code class="mono">/api/v1</code> и auth-слой уже готовы — дёшево.</p>
+<ul><li><b>MCP-сервер для ИИ-агентов</b>: инструменты «описать потребность →</li></ul>
+<p>  получить shortlist → отправить приглашение» поверх того же REST API.</p></div>
+</body></html>

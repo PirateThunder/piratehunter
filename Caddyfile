@@ -1,0 +1,38 @@
+# PirateHunter — прод. Caddy сам выпускает и продлевает сертификаты
+# Let's Encrypt (HTTP-01), редиректит HTTP→HTTPS. Замени
+# piratehunter.example.com на свой домен: нужны A-записи на IP сервера
+# и открытые порты 80/443.
+#
+# ВАЖНО: Caddyfile примонтирован в контейнер файлом. git pull заменяет
+# файл новым инодом, и контейнер продолжает видеть СТАРЫЙ конфиг.
+# После правок этого файла:
+#   docker compose --env-file .env -f docker-compose.yml \
+#     -f docker-compose.prod.yml up -d --force-recreate caddy
+
+# Основной сайт: лендинг + оба ЛК (Next.js)
+piratehunter.example.com {
+	encode zstd gzip
+	reverse_proxy frontend:56151
+}
+
+# www → apex
+www.piratehunter.example.com {
+	redir https://piratehunter.example.com{uri} permanent
+}
+
+# Публичный API бэкенда (/api/v1, JWT)
+api.piratehunter.example.com {
+	reverse_proxy backend:64844
+}
+
+# --- internal-сервисы: НАРУЖУ НЕ ВЫСТАВЛЕНЫ намеренно (PRD §4.2) ------
+# core-api (:51457) — внутренний API, с ним общается только backend
+# внутри docker-сети.
+#
+# Исключение — мок-OIDC «FSP ID» (fsp_registry :52457): браузер должен
+# достучаться до authorize-страницы. В бою это внешний провайдер; на
+# стенде мок выставляем отдельным поддоменом и подставляем его адрес в
+# BACK_FSP_PUBLIC_URL / BACK_FSP_REDIRECT_URI (.env):
+# fsp-id.piratehunter.example.com {
+# 	reverse_proxy fsp-registry:52457
+# }

@@ -1,0 +1,112 @@
+/*
+ * SWAPPABLE THEME LAYER — ФСП brand identity (PRD §3.3).
+ * Post-hackathon rebrand = replace THIS file with tokens.pirate.css;
+ * components are untouched: they use only Tailwind utilities generated
+ * from the @theme bindings below (bg-primary, text-muted-foreground,
+ * rounded-card, font-mono, ...).
+ *
+ * Two levels:
+ *  1) :root — raw brand values (--fsp-*) + shadcn-pattern semantic aliases
+ *     (--background, --primary, ...) derived from them;
+ *  2) @theme inline — binds Tailwind design tokens to those variables.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Raw ФСП palette (extracted from fsp-russia.ru + брендбук) */
+  --fsp-accent: #402fff; /* primary buttons, links, active states */
+  --fsp-accent-hover: #3525d9; /* derived: hover for accent */
+  --fsp-accent-soft: #eeedff; /* derived: accent-tinted surface */
+  --fsp-on-accent: #ffffff;
+  --fsp-ink: #1b1c21; /* headings, primary text */
+  --fsp-ink-2: #2d2e37; /* body text, dark elements */
+  --fsp-muted: #838388; /* secondary text */
+  --fsp-muted-2: #9b9c9e; /* placeholders, disabled */
+  --fsp-bg: #ffffff;
+  --fsp-bg-2: #ededed; /* section background, card fields */
+  --fsp-danger: #ec1d35;
+  --fsp-danger-soft: #fdebee;
+  --fsp-success: #1fa85c; /* derived: accepted/verified statuses */
+  --fsp-success-soft: #e6f6ed;
+  --fsp-line: #e2e2e4; /* derived: hairline borders on white */
+
+  /* Радиусы ФСП: 6px контролы / 12px карточки / 100px пилюли */
+  --fsp-radius-control: 6px;
+  --fsp-radius-card: 12px;
+  --fsp-radius-pill: 100px;
+
+  /* Self-hosted fonts (see fonts.css; files in /public/fonts) */
+  --fsp-font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fsp-font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* shadcn-pattern semantic aliases, built from the brand values above */
+  --background: var(--fsp-bg);
+  --foreground: var(--fsp-ink);
+  --heading: var(--fsp-ink);
+  --card: var(--fsp-bg);
+  --card-foreground: var(--fsp-ink);
+  --popover: var(--fsp-bg);
+  --popover-foreground: var(--fsp-ink);
+  --primary: var(--fsp-accent);
+  --primary-hover: var(--fsp-accent-hover);
+  --primary-foreground: var(--fsp-on-accent);
+  --secondary: var(--fsp-bg-2);
+  --secondary-foreground: var(--fsp-ink-2);
+  --muted: var(--fsp-bg-2);
+  --muted-foreground: var(--fsp-muted);
+  --accent: var(--fsp-accent);
+  --accent-foreground: var(--fsp-on-accent);
+  --destructive: var(--fsp-danger);
+  --destructive-foreground: #ffffff;
+  --border: var(--fsp-line);
+  --input: var(--fsp-line);
+  --ring: var(--fsp-accent);
+  --radius: var(--fsp-radius-control);
+}
+
+@theme inline {
+  /* shadcn-pattern semantic tokens */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-heading: var(--heading);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* FSP extras without shadcn counterparts */
+  --color-ink: var(--fsp-ink);
+  --color-ink-2: var(--fsp-ink-2);
+  --color-placeholder: var(--fsp-muted-2);
+  --color-primary-soft: var(--fsp-accent-soft);
+  --color-danger-soft: var(--fsp-danger-soft);
+  --color-success: var(--fsp-success);
+  --color-success-soft: var(--fsp-success-soft);
+
+  /* Radii: shadcn scale anchored to ФСП 6/12 + explicit brand names */
+  --radius-sm: 4px;
+  --radius-md: var(--fsp-radius-control);
+  --radius-lg: var(--fsp-radius-control);
+  --radius-xl: var(--fsp-radius-card);
+  --radius-control: var(--fsp-radius-control);
+  --radius-card: var(--fsp-radius-card);
+  --radius-pill: var(--fsp-radius-pill);
+
+  --font-sans: var(--fsp-font-sans);
+  --font-mono: var(--fsp-font-mono);
+}

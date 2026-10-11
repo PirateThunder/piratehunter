@@ -1,0 +1,15 @@
+# python / uv
+__pycache__/
+*.pyc
+.venv/
+.ruff_cache/
+.pytest_cache/
+
+# секреты
+.env
+
+# локальная sqlite для ручного прогона
+*.db
+
+# ОС
+.DS_Store

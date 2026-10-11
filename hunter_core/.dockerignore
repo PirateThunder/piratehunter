@@ -1,0 +1,8 @@
+.venv/
+out/
+__pycache__/
+.ruff_cache/
+.pytest_cache/
+tests/
+*.pyc
+hunter_core_local.db

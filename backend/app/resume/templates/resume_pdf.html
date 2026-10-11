@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>{{ fio }} — профиль PirateHunter</title>
+<style>
+  /* айдентика ФСП (§3.3): accent #402FFF, ink #1B1C21, Inter/JetBrains
+     Mono (системные fallback — шрифты не встраиваем) */
+  :root {
+    --accent: #402FFF; --ink: #1B1C21; --ink-2: #2D2E37;
+    --muted: #838388; --bg-2: #EDEDED; --danger: #EC1D35;
+  }
+  @page { size: A4; margin: 18mm 16mm; }
+  body {
+    font-family: "Inter", "DejaVu Sans", sans-serif; color: var(--ink);
+    font-size: 11pt; line-height: 1.45; margin: 0;
+  }
+  .mono { font-family: "JetBrains Mono", "DejaVu Sans Mono", monospace; }
+  header { border-bottom: 3px solid var(--accent); padding-bottom: 10px;
+           margin-bottom: 18px; }
+  .brand { color: var(--accent); font-size: 9pt; font-weight: 700;
+           letter-spacing: 2px; text-transform: uppercase; }
+  h1 { font-size: 22pt; margin: 6px 0 2px; }
+  .spec { color: var(--ink-2); font-size: 12pt; }
+  .badge {
+    display: inline-block; border-radius: 100px; padding: 3px 14px;
+    font-size: 9.5pt; font-weight: 600; margin-top: 8px;
+  }
+  .badge-ok { background: var(--accent); color: #fff; }
+  .badge-warn { background: var(--bg-2); color: var(--muted); }
+  h2 {
+    font-size: 12pt; color: var(--accent); margin: 18px 0 8px;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .pills span {
+    display: inline-block; background: var(--bg-2); border-radius: 100px;
+    padding: 3px 12px; margin: 0 6px 6px 0; font-size: 9.5pt;
+  }
+  .muted { color: var(--muted); }
+  .fsp-item { margin-bottom: 6px; }
+  .contacts-plate {
+    margin-top: 22px; background: var(--bg-2); border-radius: 12px;
+    padding: 14px 18px; color: var(--ink-2); font-size: 10pt;
+  }
+  footer { margin-top: 26px; color: var(--muted); font-size: 8.5pt;
+           border-top: 1px solid var(--bg-2); padding-top: 8px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">PirateHunter · верифицированный профиль</div>
+  <h1>{{ fio }}</h1>
+  <div class="spec">{{ spec_title }}{% if experience_years is not none %}
+   · опыт {{ experience_years }}{% if experience_years < 5 %} г.{% else %} лет{% endif %}{% endif %}</div>
+  {% if grade_verified %}
+  <span class="badge badge-ok">грейд {{ grade_verified }} — подтверждён
+    адаптивным тестом</span>
+  {% else %}
+  <span class="badge badge-warn">грейд{% if grade_claimed %}
+    {{ grade_claimed }}{% endif %} — не подтверждён тестом</span>
+  {% endif %}
+</header>
+
+{% if stack %}
+<h2>Стек</h2>
+<div class="pills">{% for tech in stack %}<span>{{ tech }}</span>{% endfor %}
+</div>
+{% endif %}
+
+{% if roles %}
+<h2>Роли</h2>
+<div class="pills">{% for role in roles %}<span>{{ role }}</span>{% endfor %}
+</div>
+{% endif %}
+
+{% if about %}
+<h2>О себе</h2>
+<p>{{ about }}</p>
+{% endif %}
+
+{% if has_fsp %}
+<h2>Достижения ФСП{% if fsp_rating %} · рейтинг
+  <span class="mono">{{ fsp_rating }}</span>{% endif %}</h2>
+{% if fsp_contests %}
+{% for c in fsp_contests %}
+<div class="fsp-item">
+  <strong>{{ c.name }}</strong>{% if c.date %},
+  <span class="mono">{{ c.date[:4] }}</span>{% endif %} —
+  {% if c.place == 1 %}победитель{% elif c.diploma %}диплом
+  {{ ["I", "II", "III"][c.diploma - 1] }} степени{% elif c.place %}место
+  {{ c.place }}{% endif %}{% if c.team_result and c.team_result.team_name %}
+  (команда «{{ c.team_result.team_name }}»){% endif %}
+</div>
+{% endfor %}
+{% else %}
+<p class="muted">История ФСП подтверждена реестром.</p>
+{% endif %}
+{% endif %}
+
+<div class="contacts-plate">
+  Контакты кандидата скрыты и раскрываются только после принятия
+  приглашения на платформе PirateHunter.
+</div>
+
+<footer>
+  Сгенерировано платформой PirateHunter · {{ generated_at }} · грейд
+  присваивается только по результату адаптивного теста
+</footer>
+</body>
+</html>
