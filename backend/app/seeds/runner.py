@@ -25,6 +25,7 @@ from ..fsp.client import FspClient
 from ..invitations.models import Invitation
 from ..needs.models import Need
 from ..users.models import User
+from ..vacancies.models import Application, Vacancy
 from .dataset import (
     CANDIDATES_TOTAL,
     DEMO_FSP_ID,
@@ -39,8 +40,8 @@ FSP_ID_PREFIX = "fsp-seed-"
 FSP_PROBE_LIMIT = 2000
 
 TRUNCATE_SQL = text(
-    'TRUNCATE invitation, need, company, grade_state, '
-    'candidate_profile, "user" RESTART IDENTITY CASCADE'
+    'TRUNCATE invitation, application, need, vacancy, company, '
+    'grade_state, candidate_profile, "user" RESTART IDENTITY CASCADE'
 )
 
 
@@ -72,7 +73,7 @@ async def probe_fsp_pool(
 
 
 async def _insert_all(session, ds: SeedDataset) -> None:
-    """Заливка в порядке FK-зависимостей (без ORM- relationships
+    """Заливка в порядке FK-зависимостей (без ORM-relationships
     юнит оф ворк порядок таблиц не выводит — флашим явно)."""
     session.add_all(User(**row) for row in ds.users)
     await session.flush()
@@ -81,7 +82,10 @@ async def _insert_all(session, ds: SeedDataset) -> None:
     session.add_all(Company(**row) for row in ds.companies)
     await session.flush()
     session.add_all(Need(**row) for row in ds.needs)
+    session.add_all(Vacancy(**row) for row in ds.vacancies)
+    await session.flush()
     session.add_all(Invitation(**row) for row in ds.invitations)
+    session.add_all(Application(**row) for row in ds.applications)
     await session.flush()
 
 
@@ -135,7 +139,8 @@ async def main() -> None:
     print(f"датасет сгенерирован (digest {ds.digest()[:12]}…): "
           f"{len(ds.users)} users, {len(ds.profiles)} профилей, "
           f"{len(ds.companies)} компаний, {len(ds.needs)} потребностей, "
-          f"{len(ds.invitations)} приглашений")
+          f"{len(ds.invitations)} приглашений, {len(ds.vacancies)} "
+          f"вакансий, {len(ds.applications)} откликов")
 
     print("truncate доменных таблиц + заливка…")
     async with SessionFactory() as session:
@@ -173,6 +178,8 @@ async def main() -> None:
     print(f"компаний:          {len(ds.companies)}")
     print(f"потребностей:      {len(ds.needs)}")
     print(f"приглашений:       {len(ds.invitations)}")
+    print(f"вакансий:          {len(ds.vacancies)} (все published)")
+    print(f"откликов:          {len(ds.applications)}")
     print("категории в core (backend × грейд):")
     for grade in ("intern", "junior", "middle", "senior"):
         size = len(await core.category_ranking("backend", grade))

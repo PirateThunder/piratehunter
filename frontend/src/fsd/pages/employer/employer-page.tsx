@@ -18,6 +18,7 @@ import { EmptyState } from '@/fsd/shared/ui/empty-state'
 import { Input } from '@/fsd/shared/ui/input'
 import { Skeleton } from '@/fsd/shared/ui/skeleton'
 import { Textarea } from '@/fsd/shared/ui/textarea'
+import { VacanciesSection } from '@/fsd/widgets/employer/vacancies-section'
 
 /** Employer dashboard (PRD §7.3): needs, invitation tracker, company profile. */
 export function EmployerPage() {
@@ -32,6 +33,7 @@ function EmployerDashboard() {
   const needs = useQuery(() => cabinetApi.employer.getNeeds())
   const invitations = useQuery(() => cabinetApi.employer.getInvitations())
   const company = useQuery(() => cabinetApi.employer.getCompany())
+  const vacancies = useQuery(() => cabinetApi.employer.getVacancies())
 
   return (
     <div className="flex flex-col gap-6">
@@ -105,6 +107,8 @@ function EmployerDashboard() {
           <Skeleton className="h-40 w-full" />
         )}
       </section>
+
+      <VacanciesSection vacancies={vacancies.data ?? []} />
     </div>
   )
 }

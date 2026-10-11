@@ -201,5 +201,47 @@ echo "$MKT" | jq -e '.from_p50 == 250000 and .to_p50 == 350000' > /dev/null || d
 echo "$MKT" | jq -c '{sample_needs, sample_invitations, from_p25, from_p50, from_p75, category_size}'
 ok "медиана вилок backend×middle = 250000 (по потребностям и приглашениям)"
 
+step "15. Вакансии: работодатель публикует — кандидат видит"
+VAC=$(curl -sf -X POST "$API/employer/vacancies" -H "authorization: Bearer $EMP_TOKEN" \
+  -H 'content-type: application/json' -d '{
+    "title": "Backend-разработчик (FastAPI)",
+    "description": "Команда платформы, сервисы на FastAPI и PostgreSQL.",
+    "spec_slug": "backend", "grade": "middle",
+    "stack_must": ["python","fastapi","postgresql"],
+    "salary_from": 260000, "salary_to": 380000, "salary_type": "gross"}')
+VAC_ID=$(echo "$VAC" | jqget .id)
+[ -n "$VAC_ID" ] || die "создание вакансии: $VAC"
+CODE=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$API/vacancies/$VAC_ID/apply" \
+  -H "authorization: Bearer $CAND_TOKEN" -H 'content-type: application/json' -d '{}')
+[ "$CODE" = 404 ] || die "черновик не должен быть виден кандидату (ждали 404, получили $CODE)"
+curl -sf -X POST "$API/employer/vacancies/$VAC_ID/publish" -H "authorization: Bearer $EMP_TOKEN" \
+  | jq -e '.status == "published"' > /dev/null || die "publish"
+VISIBLE=$(curl -sf "$API/vacancies?spec=backend&limit=50" -H "authorization: Bearer $CAND_TOKEN" \
+  | jq -r --arg id "$VAC_ID" '[.[] | select(.id == $id)][0].title')
+[ "$VISIBLE" = "Backend-разработчик (FastAPI)" ] || die "вакансия не видна кандидату: $VISIBLE"
+ok "вакансия $VAC_ID опубликована и видна кандидатам"
+
+step "16. Отклик кандидата (§7.7 — инициатива) + защита от дублей"
+APP=$(curl -sf -X POST "$API/vacancies/$VAC_ID/apply" -H "authorization: Bearer $CAND_TOKEN" \
+  -H 'content-type: application/json' -d '{"message":"Интересна платформа, готов обсудить"}')
+APP_ID=$(echo "$APP" | jqget .id)
+[ -n "$APP_ID" ] || die "отклик: $APP"
+CODE=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$API/vacancies/$VAC_ID/apply" \
+  -H "authorization: Bearer $CAND_TOKEN" -H 'content-type: application/json' -d '{"message":"дубль"}')
+[ "$CODE" = 409 ] || die "повторный отклик ожидали 409, получили $CODE"
+ok "отклик $APP_ID создан, повтор отклонён (409)"
+
+step "17. Работодатель видит контакты откликнувшегося → invited → кандидат видит компанию"
+VIEW=$(curl -sf "$API/employer/vacancies/$VAC_ID/applications" -H "authorization: Bearer $EMP_TOKEN")
+echo "$VIEW" | jq -e --arg id "$APP_ID" '[.[] | select(.id == $id)][0].candidate.contacts.contacts != null' \
+  > /dev/null || die "контакты откликнувшегося не видны: $VIEW"
+curl -sf -X PATCH "$API/employer/applications/$APP_ID" -H "authorization: Bearer $EMP_TOKEN" \
+  -H 'content-type: application/json' -d '{"status":"invited"}' \
+  | jq -e '.status == "invited"' > /dev/null || die "PATCH → invited"
+curl -sf "$API/candidate/applications" -H "authorization: Bearer $CAND_TOKEN" \
+  | jq -e --arg id "$APP_ID" '[.[] | select(.id == $id)][0].company.contacts.contacts != null' \
+  > /dev/null || die "контакты компании не открылись приглашённому кандидату"
+ok "контакты: отклик открыл их работодателю, invited — кандидату"
+
 step "СМОУК ПРОЙДЕН"
-echo "Все 14 шагов зелёные. Стек живой, сквозной сценарий работает."
+echo "Все 17 шагов зелёные. Стек живой, сквозной сценарий работает."

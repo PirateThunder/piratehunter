@@ -19,6 +19,10 @@ export type SalaryType = 'gross' | 'net'
 
 export type InvitationStatus = 'sent' | 'viewed' | 'accepted' | 'declined'
 
+export type VacancyStatus = 'draft' | 'published' | 'closed'
+
+export type ApplicationStatus = 'sent' | 'viewed' | 'invited' | 'rejected'
+
 export interface CatalogTopic {
   slug: string
   title: string
@@ -353,4 +357,88 @@ export interface InvitationCreateIn {
 /** Accept response: contacts of BOTH sides revealed (§7.2) */
 export interface InvitationAcceptOut {
   invitation: InvitationCandidate
+}
+
+// ── Vacancies & applications (PRD §7.7; contract phase 3) ────────────
+/** Employer-side vacancy object (own CRUD). */
+export interface Vacancy {
+  id: string
+  title: string
+  description: string
+  spec_slug: SpecSlug | null
+  grade: Grade | null
+  stack_must: string[]
+  stack_nice: string[]
+  salary_from: number
+  salary_to: number
+  salary_type: SalaryType
+  status: VacancyStatus
+  created_at: string
+  published_at: string | null
+  closed_at: string | null
+}
+
+export interface VacancyIn {
+  title: string
+  description: string
+  spec_slug?: SpecSlug | null
+  grade?: Grade | null
+  stack_must?: string[]
+  stack_nice?: string[]
+  salary_from: number
+  salary_to: number
+  salary_type: SalaryType
+  /** Идемпотентный upsert по внешнему ключу (повтор → 200) */
+  external_id?: string
+}
+
+/** Published vacancy in the candidate-facing list. */
+export interface VacancyPublic {
+  id: string
+  title: string
+  description: string
+  spec_slug: SpecSlug | null
+  grade: Grade | null
+  stack_must: string[]
+  stack_nice: string[]
+  salary_from: number
+  salary_to: number
+  salary_type: SalaryType
+  company: { name: string; industry: string | null; site: string | null }
+  published_at: string | null
+  already_applied: boolean
+}
+
+export interface VacancyFilters {
+  spec?: SpecSlug
+  grade?: Grade
+  stack?: string
+  salary_from?: number
+  limit?: number
+  offset?: number
+}
+
+/** Incoming application at the employer: contacts are open (self-applied). */
+export interface ApplicationEmployer {
+  id: string
+  status: ApplicationStatus
+  message: string
+  created_at: string
+  candidate: CandidateEmployer
+}
+
+/** Own application at the candidate: company contacts open when invited. */
+export interface ApplicationCandidate {
+  id: string
+  status: ApplicationStatus
+  message: string
+  created_at: string
+  vacancy: {
+    id: string
+    title: string
+    salary_from: number
+    salary_to: number
+    salary_type: SalaryType
+  }
+  company: CompanyCandidate
 }

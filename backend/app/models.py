@@ -40,3 +40,4 @@ def import_models() -> None:
     from .invitations import models as _invitations  # noqa: F401
     from .needs import models as _needs  # noqa: F401
     from .users import models as _users  # noqa: F401
+    from .vacancies import models as _vacancies  # noqa: F401

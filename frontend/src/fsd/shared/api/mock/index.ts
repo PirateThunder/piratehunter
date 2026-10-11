@@ -1,4 +1,6 @@
 import type {
+  ApplicationCandidate,
+  ApplicationEmployer,
   CandidateEmployer,
   CandidateSelf,
   CompanySelf,
@@ -10,6 +12,8 @@ import type {
   SalaryMarket,
   Shortlist,
   SpecSlug,
+  Vacancy,
+  VacancyPublic,
 } from '../types'
 
 /*
@@ -298,11 +302,127 @@ function respond<T>(data: T): Promise<T> {
   return Promise.resolve(structuredClone(data))
 }
 
+const vacanciesPublic: VacancyPublic[] = [
+  {
+    id: 'vac-1',
+    title: 'Backend-разработчик (Python)',
+    description: 'Сервисы платформы логистики: FastAPI, PostgreSQL, Redis. Команда 8 человек.',
+    spec_slug: 'backend',
+    grade: 'middle',
+    stack_must: ['Python', 'FastAPI', 'PostgreSQL'],
+    stack_nice: ['Redis'],
+    salary_from: 220000,
+    salary_to: 280000,
+    salary_type: 'gross',
+    company: {
+      name: 'ООО «Северный вектор»',
+      industry: 'Логистика / SaaS',
+      site: 'https://sevvector.ru',
+    },
+    published_at: '2026-10-06T12:00:00Z',
+    already_applied: false,
+  },
+  {
+    id: 'vac-2',
+    title: 'Frontend-разработчик (React)',
+    description: 'Личный кабинет платёжного сервиса, Next.js + TypeScript.',
+    spec_slug: 'frontend',
+    grade: 'middle',
+    stack_must: ['TypeScript', 'React'],
+    stack_nice: ['Next.js'],
+    salary_from: 200000,
+    salary_to: 260000,
+    salary_type: 'net',
+    company: { name: 'АО «Финтех Лаб»', industry: 'Финтех', site: null },
+    published_at: '2026-10-04T12:00:00Z',
+    already_applied: true,
+  },
+]
+
+const myApplications: ApplicationCandidate[] = [
+  {
+    id: 'app-1',
+    status: 'invited',
+    message: 'Добрый день! Интересна команда платёжного ядра.',
+    created_at: '2026-10-05T09:00:00Z',
+    vacancy: {
+      id: 'vac-2',
+      title: 'Frontend-разработчик (React)',
+      salary_from: 200000,
+      salary_to: 260000,
+      salary_type: 'net',
+    },
+    company: {
+      company: {
+        company_id: 'comp-2',
+        name: 'АО «Финтех Лаб»',
+        description: null,
+        industry: 'Финтех',
+        site: null,
+      },
+      contacts: { contacts: { email: 'hr@fintech.dev', telegram: '@fintech_hr' } },
+    },
+  },
+]
+
+const vacancyApplications: ApplicationEmployer[] = [
+  {
+    id: 'app-1',
+    status: 'sent',
+    message: 'Готов к задачам платформы логистики, есть похожий опыт.',
+    created_at: '2026-10-07T10:00:00Z',
+    candidate: {
+      profile: candidatePublic,
+      contacts: {
+        email: 'ivan@example.com',
+        phone: '+7 900 123-45-67',
+        contacts: { telegram: '@ivanpetrov' },
+      },
+    },
+  },
+]
+
+const employerVacancies: Vacancy[] = [
+  {
+    id: 'vac-1',
+    title: 'Backend-разработчик (Python)',
+    description: 'Сервисы платформы логистики: FastAPI, PostgreSQL, Redis.',
+    spec_slug: 'backend',
+    grade: 'middle',
+    stack_must: ['Python', 'FastAPI', 'PostgreSQL'],
+    stack_nice: ['Redis'],
+    salary_from: 220000,
+    salary_to: 280000,
+    salary_type: 'gross',
+    status: 'published',
+    created_at: '2026-10-02T12:00:00Z',
+    published_at: '2026-10-06T12:00:00Z',
+    closed_at: null,
+  },
+  {
+    id: 'vac-2',
+    title: 'DevOps-инженер',
+    description: 'Kubernetes, observability, CI/CD.',
+    spec_slug: 'devops',
+    grade: 'senior',
+    stack_must: ['Kubernetes', 'Docker'],
+    stack_nice: ['Terraform'],
+    salary_from: 300000,
+    salary_to: 380000,
+    salary_type: 'gross',
+    status: 'draft',
+    created_at: '2026-10-07T12:00:00Z',
+    published_at: null,
+    closed_at: null,
+  },
+]
+
 export const mockApi = {
   candidate: {
     getProfile: () => respond(profile),
     getGrade: () => respond(grade),
     getInvitations: () => respond(candidateInvitations),
+    getApplications: () => respond(myApplications),
   },
   employer: {
     getCompany: () => respond(company),
@@ -313,6 +433,13 @@ export const mockApi = {
     getCandidates: () => respond(bank),
     getInvitations: () => respond(employerInvitations),
     getSalaryMarket: (_spec: SpecSlug, _grade: Grade) => respond(salaryMarket),
+    getVacancies: () => respond(employerVacancies),
+    getVacancy: (id: string) =>
+      respond(employerVacancies.find((v) => v.id === id) ?? employerVacancies[0]),
+    getVacancyApplications: (_id: string) => respond(vacancyApplications),
+  },
+  vacancy: {
+    list: () => respond(vacanciesPublic),
   },
 }
 

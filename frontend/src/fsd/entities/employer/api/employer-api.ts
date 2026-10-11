@@ -1,5 +1,6 @@
 import { api } from '@/fsd/shared/api/http'
 import type {
+  ApplicationEmployer,
   CandidateEmployer,
   CompanyIn,
   CompanySelf,
@@ -12,6 +13,8 @@ import type {
   SalaryMarket,
   Shortlist,
   SpecSlug,
+  Vacancy,
+  VacancyIn,
 } from '@/fsd/shared/api/types'
 
 /** Live backend calls of the employer cabinet (contract PRD §8.1). */
@@ -85,4 +88,42 @@ export function createInvitation(body: InvitationCreateIn) {
 // ── Salary market widget (PRD §7.5.5) ────────────────────────────────
 export function fetchSalaryMarket(spec: SpecSlug, grade: Grade) {
   return api.get('employer/market/salary', { searchParams: { spec, grade } }).json<SalaryMarket>()
+}
+
+// ── Vacancies (PRD §7.7; contract phase 3) ───────────────────────────
+export function fetchVacancies() {
+  return api.get('employer/vacancies').json<Vacancy[]>()
+}
+
+export function fetchVacancy(id: string) {
+  return api.get(`employer/vacancies/${id}`).json<Vacancy>()
+}
+
+export function createVacancy(body: VacancyIn) {
+  // 201 on create; 200 on idempotent upsert by external_id
+  return api.post('employer/vacancies', { json: body }).json<Vacancy>()
+}
+
+export function updateVacancy(id: string, body: VacancyIn) {
+  return api.put(`employer/vacancies/${id}`, { json: body }).json<Vacancy>()
+}
+
+export function deleteVacancy(id: string) {
+  return api.delete(`employer/vacancies/${id}`)
+}
+
+export function publishVacancy(id: string) {
+  return api.post(`employer/vacancies/${id}/publish`).json<Vacancy>()
+}
+
+export function closeVacancy(id: string) {
+  return api.post(`employer/vacancies/${id}/close`).json<Vacancy>()
+}
+
+export function fetchVacancyApplications(vacancyId: string) {
+  return api.get(`employer/vacancies/${vacancyId}/applications`).json<ApplicationEmployer[]>()
+}
+
+export function patchApplicationStatus(id: string, status: 'viewed' | 'invited' | 'rejected') {
+  return api.patch(`employer/applications/${id}`, { json: { status } }).json<ApplicationEmployer>()
 }

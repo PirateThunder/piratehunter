@@ -1,4 +1,5 @@
 import {
+  fetchCandidateApplications,
   fetchCandidateGrade,
   fetchCandidateInvitations,
   fetchCandidateProfile,
@@ -11,11 +12,15 @@ import {
   fetchNeeds,
   fetchSalaryMarket,
   fetchShortlist,
+  fetchVacancies,
+  fetchVacancy,
+  fetchVacancyApplications,
 } from '@/fsd/entities/employer/api/employer-api'
+import { fetchPublicVacancies } from '@/fsd/entities/vacancy/api/vacancy-api'
 import { env } from '@/fsd/shared/config/env'
 
 import { type CabinetApi, mockApi } from './mock'
-import type { Grade, SpecSlug } from './types'
+import type { Grade, SpecSlug, VacancyFilters } from './types'
 
 /*
  * Cabinet data facade. Phase 2 default: live backend (entity APIs).
@@ -28,6 +33,7 @@ const liveApi: CabinetApi = {
     getProfile: () => fetchCandidateProfile(),
     getGrade: () => fetchCandidateGrade(),
     getInvitations: () => fetchCandidateInvitations(),
+    getApplications: () => fetchCandidateApplications(),
   },
   employer: {
     getCompany: () => fetchCompany(),
@@ -37,6 +43,12 @@ const liveApi: CabinetApi = {
     getCandidates: () => fetchCandidates(),
     getInvitations: () => fetchEmployerInvitations(),
     getSalaryMarket: (spec: SpecSlug, grade: Grade) => fetchSalaryMarket(spec, grade),
+    getVacancies: () => fetchVacancies(),
+    getVacancy: (id: string) => fetchVacancy(id),
+    getVacancyApplications: (id: string) => fetchVacancyApplications(id),
+  },
+  vacancy: {
+    list: (filters?: VacancyFilters) => fetchPublicVacancies(filters),
   },
 }
 

@@ -20,6 +20,7 @@ from .needs import router as needs_router
 from .resume import router as resume_router
 from .testing import router as testing_router
 from .users import router as users_router
+from .vacancies import router as vacancies_router
 from .version import VERSION
 
 SHOW_DOCS_IN = {"local"}
@@ -70,3 +71,4 @@ app.include_router(needs_router.router, prefix="/api/v1")
 app.include_router(invitations_router.router, prefix="/api/v1")
 app.include_router(testing_router.router, prefix="/api/v1")
 app.include_router(market_router.router, prefix="/api/v1")
+app.include_router(vacancies_router.router, prefix="/api/v1")

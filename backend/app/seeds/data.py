@@ -232,11 +232,134 @@ INVITATION_TEXTS = [
 
 CONTACT_METHODS = ["telegram", "email", "телефон"]
 
+# вакансии (§7.7): 2 на демо-работодателе + 10 на сид-компаниях
+# (company: "demo" | индекс COMPANY_NAMES); все published
+VACANCY_DEFS = [
+    {
+        "company": "demo",
+        "title": "Backend-разработчик (Python/FastAPI)",
+        "description": "Развитие платёжного ядра платформы: API на "
+        "FastAPI, PostgreSQL, очереди. Команда 6 человек, code review, "
+        "гибридный формат.",
+        "spec": "backend", "grade": "middle",
+        "stack_must": ["python", "fastapi", "postgresql"],
+        "stack_nice": ["redis", "kafka"],
+    },
+    {
+        "company": "demo",
+        "title": "Frontend-разработчик (React/TypeScript)",
+        "description": "Личный кабинет партнёра: Next.js, дизайн-система, "
+        "работа с API платформы. Плотная связка с продуктом.",
+        "spec": "frontend", "grade": "middle",
+        "stack_must": ["typescript", "react", "nextjs"],
+        "stack_nice": ["tailwind", "redux"],
+    },
+    {
+        "company": 0,
+        "title": "Middle backend-разработчик (Python)",
+        "description": "Внутренние сервисы биллинга: FastAPI, PostgreSQL, "
+        "Celery. Пишем тесты, уважаем миграции.",
+        "spec": "backend", "grade": "middle",
+        "stack_must": ["python", "fastapi", "postgresql"],
+        "stack_nice": ["celery", "redis"],
+    },
+    {
+        "company": 1,
+        "title": "Senior DevOps-инженер",
+        "description": "Kubernetes в проде, Terraform, наблюдаемость "
+        "(Prometheus/Grafana), on-call по ротации.",
+        "spec": "devops", "grade": "senior",
+        "stack_must": ["kubernetes", "terraform", "linux"],
+        "stack_nice": ["prometheus", "aws"],
+    },
+    {
+        "company": 2,
+        "title": "ML-инженер (middle)",
+        "description": "Классический ML на табличных данных: sklearn/"
+        "catboost, вывод моделей в прод через FastAPI-сервисы.",
+        "spec": "data-ml", "grade": "middle",
+        "stack_must": ["python", "sklearn", "sql"],
+        "stack_nice": ["catboost", "docker"],
+    },
+    {
+        "company": 3,
+        "title": "Senior backend-разработчик (Go)",
+        "description": "Высоконагруженный API-шлюз: gRPC, Kubernetes, "
+        "профилирование под нагрузкой 30k RPS.",
+        "spec": "backend", "grade": "senior",
+        "stack_must": ["go", "kubernetes", "postgresql"],
+        "stack_nice": ["grpc", "redis"],
+    },
+    {
+        "company": 4,
+        "title": "QA-инженер (junior)",
+        "description": "Ручное тестирование веб-приложений, рост в "
+        "автоматизацию на pytest. Ментор от лида QA.",
+        "spec": "qa", "grade": "junior",
+        "stack_must": ["pytest", "sql"],
+        "stack_nice": ["selenium", "postman"],
+    },
+    {
+        "company": 5,
+        "title": "Мобильный разработчик (Kotlin)",
+        "description": "Android-приложение маркетплейса: Compose, "
+        "корутины, модульная архитектура.",
+        "spec": "mobile", "grade": "middle",
+        "stack_must": ["kotlin", "android", "compose"],
+        "stack_nice": ["coroutines", "firebase"],
+    },
+    {
+        "company": 6,
+        "title": "Junior fullstack-разработчик",
+        "description": "Небольшая команда, широкие задачи: React + "
+        "Node.js, немного DevOps. Менторство.",
+        "spec": "fullstack", "grade": "junior",
+        "stack_must": ["typescript", "react", "nodejs"],
+        "stack_nice": ["postgresql", "docker"],
+    },
+    {
+        "company": 7,
+        "title": "DevOps-инженер (middle)",
+        "description": "CI/CD для монорепы, GitLab CI, Docker, первые "
+        "шаги в Kubernetes.",
+        "spec": "devops", "grade": "middle",
+        "stack_must": ["docker", "linux", "gitlab-ci"],
+        "stack_nice": ["kubernetes", "bash"],
+    },
+    {
+        "company": 8,
+        "title": "Frontend-разработчик (middle)",
+        "description": "Конструктор лендингов: React, TypeScript, "
+        "Storybook, тесная работа с дизайнерами.",
+        "spec": "frontend", "grade": "middle",
+        "stack_must": ["typescript", "react"],
+        "stack_nice": ["storybook", "jest"],
+    },
+    {
+        "company": 9,
+        "title": "Junior backend-разработчик (Python)",
+        "description": "CRM для медицинских клиник: Django, PostgreSQL, "
+        "много внимательности к данным.",
+        "spec": "backend", "grade": "junior",
+        "stack_must": ["python", "django", "postgresql"],
+        "stack_nice": ["redis", "docker"],
+    },
+]
+
+APPLICATION_MESSAGES = [
+    "Добрый день! Профиль вакансии совпадает с моим стеком — буду рад "
+    "обсудить.",
+    "Здравствуйте! Интересна команда и задачи, готов пройти тестовое.",
+    "Добрый день! Есть релевантный опыт, резюме в профиле.",
+    None,
+]
+
 __all__ = [
     "GRADES", "GRADE_BANDS", "DEEP_SPECS", "WIDE_SPECS",
     "DEEP_PER_GRADE", "WIDE_PER_GRADE",
     "FIRST_NAMES_M", "FIRST_NAMES_F", "LAST_NAMES_M", "LAST_NAMES_F",
     "STACK_POOLS", "SPEC_TITLES", "ABOUT_TEMPLATES", "MARKET_SALARY",
     "COMPANY_NAMES", "COMPANY_INDUSTRIES", "NEED_DEFS",
-    "INVITATION_TEXTS", "CONTACT_METHODS",
+    "INVITATION_TEXTS", "CONTACT_METHODS", "VACANCY_DEFS",
+    "APPLICATION_MESSAGES",
 ]

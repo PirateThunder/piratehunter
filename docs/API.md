@@ -41,8 +41,9 @@ core-api (`/internal/*`) и fsp_registry (`/fsp/v1`, `/oidc/*`) наружу н�
 | GET | `/candidate/invitations` | входящие приглашения (компания, текст, **вилка ЗП**, способ связи) |
 | POST | `/candidate/invitations/{id}/accept` | принять → контакты раскрываются обеим сторонам |
 | POST | `/candidate/invitations/{id}/decline` | отклонить |
-| GET | `/vacancies?filters` | опубликованные вакансии (опц. фича) |
-| POST | `/vacancies/{id}/apply` | отклик с сопроводительным |
+| GET | `/vacancies?spec&grade&stack&salary_from&limit&offset` | опубликованные вакансии (только `published`), с `already_applied` |
+| POST | `/vacancies/{id}/apply` | отклик `{message?}` → 201; 404 не-published; 409 повторный |
+| GET | `/candidate/applications` | свои отклики; контакты компании открываются при статусе `invited` |
 
 ## Работодатель
 
@@ -55,8 +56,9 @@ core-api (`/internal/*`) и fsp_registry (`/fsp/v1`, `/oidc/*`) наружу н�
 | GET | `/employer/market/salary?spec&grade` | виджет «вилка vs рынок»: p25/p50/p75 по данным платформы + размер категории |
 | GET | `/employer/candidates?spec&grade&stack&fsp&category` | банк кандидатов с фильтрами |
 | POST/GET | `/employer/invitations` | приглашения (вилка обязательна — 422 без неё; лимит 100/час на компанию), трекер статусов |
-| CRUD | `/employer/vacancies` | вакансии (вилка обязательна, gross/net подписан) |
-| GET | `/employer/vacancies/{id}/applications` | входящие отклики, смена статусов |
+| CRUD | `/employer/vacancies` | вакансии: вилка обязательна (gross/net), статусы draft→published→closed, `external_id` для ATS-идемпотентности |
+| GET | `/employer/vacancies/{id}/applications` | входящие отклики — контакты откликнувшегося видны (он инициировал контакт) |
+| PATCH | `/employer/applications/{id}` | смена статуса отклика `viewed\|invited\|rejected` |
 
 ## Справочник и общее
 

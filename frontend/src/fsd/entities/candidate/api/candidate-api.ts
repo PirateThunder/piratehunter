@@ -1,5 +1,6 @@
 import { api } from '@/fsd/shared/api/http'
 import type {
+  ApplicationCandidate,
   CandidateSelf,
   Grade,
   GradeInfo,
@@ -82,4 +83,9 @@ export function startTestSession(gradeTarget: Grade, mode: TestMode = 'full') {
 
 export function answerTest(sessionId: string, answer: string | number | null) {
   return api.post(`tests/sessions/${sessionId}/answers`, { json: { answer } }).json<TestAnswerOut>()
+}
+
+// ── Applications (PRD §7.7; contract phase 3) ────────────────────────
+export function fetchCandidateApplications() {
+  return api.get('candidate/applications').json<ApplicationCandidate[]>()
 }

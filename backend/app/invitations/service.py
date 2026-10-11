@@ -1,10 +1,9 @@
-"""Логика приглашений и ПРАВИЛО ВИДИМОСТИ КОНТАКТОВ (PRD §7.6).
+"""Логика приглашений и ПРАВИЛО ВИДИМОСТИ КОНТАКТОВ (PRD §7.6, §7.7).
 
 can_view_contacts / contacts_allowed_ids — единственная точка решения
 «открыты ли контакты кандидата этой компании»: accepted-приглашение
-от компании (в фазе 2 добавится Application от кандидата — правило
-расширяется здесь, сериализаторы не трогаем). Роутеры решение не
-дублируют.
+от компании ИЛИ отклик кандидата на вакансию компании (сам инициировал
+контакт). Роутеры решение не дублируют.
 """
 
 import logging
@@ -20,6 +19,7 @@ from ..companies.models import Company
 from ..config import get_settings
 from ..users.constants import ROLE_CANDIDATE
 from ..users.models import User
+from ..vacancies.models import Application, Vacancy
 from .constants import ACCEPTED, DECLINED, OPEN_STATUSES, SENT, VIEWED
 from .models import Invitation
 from .schemas import InvitationCreateIn
@@ -40,18 +40,28 @@ async def contacts_allowed_ids(
     session: AsyncSession, company_id: str, candidate_ids: list[str]
 ) -> set[str]:
     """Кандидаты из списка, чьи контакты открыты ЭТОЙ компании:
-    есть приглашение компании в статусе accepted. (Фаза 2: + отклик
-    Application кандидата на вакансию компании — §7.6.)"""
+    ЛИБО accepted-приглашение компании кандидату, ЛИБО отклик
+    кандидата на вакансию компании (§7.6/§7.7 — отклик = кандидат сам
+    инициировал контакт). Единственная точка решения; сериализаторы и
+    роутеры её не дублируют."""
     if not candidate_ids:
         return set()
-    result = await session.scalars(
+    accepted = await session.scalars(
         select(Invitation.candidate_id).where(
             Invitation.company_id == company_id,
             Invitation.candidate_id.in_(candidate_ids),
             Invitation.status == ACCEPTED,
         )
     )
-    return set(result)
+    applied = await session.scalars(
+        select(Application.candidate_id)
+        .join(Vacancy, Vacancy.id == Application.vacancy_id)
+        .where(
+            Vacancy.company_id == company_id,
+            Application.candidate_id.in_(candidate_ids),
+        )
+    )
+    return set(accepted) | set(applied)
 
 
 async def can_view_contacts(

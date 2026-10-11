@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 from ..fsp.scoring import compute_fsp_score
 from .data import (
     ABOUT_TEMPLATES,
+    APPLICATION_MESSAGES,
     COMPANY_INDUSTRIES,
     COMPANY_NAMES,
     CONTACT_METHODS,
@@ -33,6 +34,7 @@ from .data import (
     NEED_DEFS,
     SPEC_TITLES,
     STACK_POOLS,
+    VACANCY_DEFS,
     WIDE_PER_GRADE,
     WIDE_SPECS,
 )
@@ -124,6 +126,8 @@ class SeedDataset:
     companies: list[dict] = field(default_factory=list)
     needs: list[dict] = field(default_factory=list)
     invitations: list[dict] = field(default_factory=list)
+    vacancies: list[dict] = field(default_factory=list)
+    applications: list[dict] = field(default_factory=list)
 
     def digest(self) -> str:
         """sha256 сериализованного датасета — метрика детерминизма."""
@@ -479,6 +483,88 @@ def _invitations(
             row["spec"], row["grade"], status, f, t)
 
 
+def _vacancies(
+    rng: random.Random, ds: SeedDataset, company_ids: list[str]
+) -> list[str]:
+    """12 опубликованных вакансий (§7.7): 2 на демо-работодателе
+    «Демо Корп», остальные — на 10 сид-компаниях. Вилки — по рыночной
+    таблице 2026. → [vacancy_id, ...] в порядке VACANCY_DEFS."""
+    demo_company = uid(f"user:{DEMO_EMPLOYER_EMAIL}")
+    vacancy_ids = []
+    for i, vdef in enumerate(VACANCY_DEFS):
+        owner = vdef["company"]
+        company_id = demo_company if owner == "demo" else company_ids[owner]
+        salary_from, salary_to = _salary_in_band(
+            rng, vdef["spec"], vdef["grade"]
+        )
+        created = BASE_TIME - timedelta(days=rng.randint(10, 40))
+        vacancy_id = uid(f"vacancy:{i}")
+        ds.vacancies.append({
+            "id": vacancy_id,
+            "company_id": company_id,
+            "title": vdef["title"],
+            "description": vdef["description"],
+            "spec_slug": vdef["spec"], "grade": vdef["grade"],
+            "stack_must": list(vdef["stack_must"]),
+            "stack_nice": list(vdef["stack_nice"]),
+            "salary_from": salary_from, "salary_to": salary_to,
+            "salary_type": "gross" if i % 4 else "net",
+            "status": "published", "external_id": None,
+            "created_at": created,
+            "published_at": created + timedelta(days=1),
+            "closed_at": None,
+        })
+        vacancy_ids.append(vacancy_id)
+    return vacancy_ids
+
+
+def _applications(
+    rng: random.Random,
+    ds: SeedDataset,
+    vacancy_ids: list[str],
+    plan: list[dict],
+) -> None:
+    """~12 откликов вперемешку по статусам. Обязательные демо-элементы:
+    демо-работодателю 3 входящих (один — от демо-кандидата со статусом
+    invited → контакты компании ему видны), у демо-кандидата 2 отклика."""
+    demo_candidate = uid(f"user:{DEMO_CANDIDATE_EMAIL}")
+    demo_fsp_candidate = uid(f"user:{DEMO_CANDIDATE_FSP_EMAIL}")
+    verified = [p for p in plan if p["verified"]]
+    seq = 0
+
+    def add(vacancy_id: str, candidate_id: str, status: str,
+            message_i: int) -> None:
+        nonlocal seq
+        created = BASE_TIME - timedelta(days=rng.randint(0, 15))
+        ds.applications.append({
+            "id": uid(f"application:{seq}"),
+            "vacancy_id": vacancy_id,
+            "candidate_id": candidate_id,
+            "message": APPLICATION_MESSAGES[
+                message_i % len(APPLICATION_MESSAGES)
+            ],
+            "status": status,
+            "created_at": created, "updated_at": created,
+        })
+        seq += 1
+
+    # 3 входящих демо-работодателю: демо-кандидат invited (демо-сценарий
+    # «контакты компании видны»), демо-fsp sent, сид-кандидат viewed
+    add(vacancy_ids[0], demo_candidate, "invited", 0)
+    add(vacancy_ids[1], demo_fsp_candidate, "sent", 1)
+    add(vacancy_ids[0], verified[0]["user_id"], "viewed", 2)
+    # второй отклик демо-кандидата — на вакансию сид-компании
+    add(vacancy_ids[2], demo_candidate, "viewed", 1)
+    # остальные 8 — микс статусов по сид-компаниям
+    for i, status in enumerate(
+        ("sent", "viewed", "invited", "rejected",
+         "sent", "viewed", "rejected", "sent")
+    ):
+        vacancy_id = vacancy_ids[2 + (i % (len(vacancy_ids) - 2))]
+        add(vacancy_id, verified[(i + 1) % len(verified)]["user_id"],
+            status, i)
+
+
 def generate(fsp_profiles: dict[str, dict]) -> SeedDataset:
     """Сгенерировать эталонный датасет. fsp_profiles — пул достижений
     {fsp_id: profile} (детерминирован реестром; должен включать
@@ -494,4 +580,6 @@ def generate(fsp_profiles: dict[str, dict]) -> SeedDataset:
     plan = _candidates(rng, ds, fsp_ids)
     _needs(rng, ds, company_ids)
     _invitations(rng, ds, company_ids, plan)
+    vacancy_ids = _vacancies(rng, ds, company_ids)
+    _applications(rng, ds, vacancy_ids, plan)
     return ds
