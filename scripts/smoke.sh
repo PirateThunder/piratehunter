@@ -37,7 +37,13 @@ step "3. Email-код (dev_code при BACK_ENV=local без SMTP)"
 EMAIL="smoke-$(date +%s)@demo.dev"
 DEV_CODE=$(curl -sf -X POST "$API/auth/email/request" -H 'content-type: application/json' \
   -d "{\"email\":\"$EMAIL\"}" | jqget .dev_code)
-[ -n "$DEV_CODE" ] || die "dev_code не вернулся"
+if [ -z "$DEV_CODE" ]; then
+  # prod-режим (BACK_ENV != local): dev_code не отдаётся — код пишется
+  # в лог backend; смоук читает его оттуда (нужен docker-compose рядом)
+  DEV_CODE=$(docker compose logs backend --since 3m 2>/dev/null \
+    | grep -oP "код для \Q$EMAIL\E: \K\d+" | tail -1)
+fi
+[ -n "$DEV_CODE" ] || die "dev_code не вернулся и в логах не нашёлся"
 MAIL_TOKEN=$(curl -sf -X POST "$API/auth/email/verify" -H 'content-type: application/json' \
   -d "{\"email\":\"$EMAIL\",\"code\":\"$DEV_CODE\"}" | jqget .access_token)
 [ -n "$MAIL_TOKEN" ] || die "email verify"
