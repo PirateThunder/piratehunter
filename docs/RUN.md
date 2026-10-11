@@ -24,7 +24,8 @@ curl localhost:56151/          # frontend
 curl localhost:52457/fsp/v1/profiles/fsp_001   # синтетический профиль ФСП (или 404)
 ```
 
-OpenAPI backend — http://localhost:64844/docs (при `BACK_ENV=local`).
+OpenAPI backend — **https://api.piratehunter.fun/docs** (живой Swagger на
+проде) или локально `http://localhost:64844/docs` (при `BACK_ENV=local`).
 Вход по email-коду: без SMTP код пишется в лог backend
 (`docker compose logs -f backend`, поле `dev_code`). При
 `BACK_AUTH_DEV_LOGIN=1` (dev-дефолт) на `/login` — кнопка входа
@@ -40,7 +41,7 @@ OpenAPI backend — http://localhost:64844/docs (при `BACK_ENV=local`).
 |---|---|
 | `./scripts/reset-dev.sh` | Стенд в чистое состояние: стоп backend/core, пересоздание схем `ph_back`/`ph_core` (DROP SCHEMA), подъём стека, дожди health. **Данные стираются.** |
 | `./scripts/seed.sh` | Ресед эталона (PRD §10) одной командой: детерминированный seed `piratehunter-v1`, truncate доменных таблиц + очистка снапшотов в core. Перед защитой/после тестов жюри база возвращается к эталону. |
-| `./scripts/smoke.sh` | Живой сквозной смоук по HTTP (14 шагов): health → dev-login → email-код → профиль → CAT-тест → потребность → shortlist → скрытость контактов → приглашение с вилкой → accept → OIDC-флоу FSP ID → LLM-парсинг → экспресс-тест → рынок вилок. Требует поднятый стек, `curl`, `jq`. |
+| `./scripts/smoke.sh` | Живой сквозной смоук по HTTP (17 шагов): health → dev-login → email-код → профиль → CAT-тест → потребность → shortlist → скрытость контактов → приглашение с вилкой → accept → OIDC-флоу FSP ID → LLM-парсинг → экспресс-тест → рынок вилок → публикация вакансии → отклик → контакты инициатора. Требует поднятый стек, `curl`, `jq`. |
 
 Воспроизводимый цикл: `reset-dev.sh` → `smoke.sh` (зелёный) → `seed.sh`.
 

@@ -1,9 +1,11 @@
 # API PirateHunter
 
 Открытый REST API платформы — `backend /api/v1` (JWT). Спецификация —
-OpenAPI (Swagger UI на `/docs` при `BACK_ENV=local/staging`, в проде
-закрыт). Канонические контракты версионированы (`/api/v1`), auth-слой
-готов к публичному API с ключами (roadmap в конце). Internal API
+OpenAPI: **живой Swagger UI — https://api.piratehunter.fun/docs**
+(в проде включается флагом `BACK_DOCS_PUBLIC=1`; локально —
+`http://localhost:64844/docs` при `BACK_ENV=local`). Канонические контракты
+версионированы (`/api/v1`), auth-слой готов к публичному API с ключами
+(roadmap в конце). Internal API
 core-api (`/internal/*`) и fsp_registry (`/fsp/v1`, `/oidc/*`) наружу не
 выставлены (PRD §4.2) — с ними общается только backend.
 

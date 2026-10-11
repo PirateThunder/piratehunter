@@ -33,7 +33,7 @@ cd fsp_registry  && uv run pytest -q && uv run ruff check .
 
 ## 2. Живой сквозной смоук — scripts/smoke.sh
 
-14 шагов по реальному стеку (`docker compose up`), каждый — HTTP-вызов
+17 шагов по реальному стеку (`docker compose up`), каждый — HTTP-вызов
 с проверкой результата (`curl` + `jq`), стоп по первому FAIL:
 
 1. **Health всех сервисов** — backend/core-api/fsp-registry `/health` + frontend `/` и `/login`.
@@ -51,13 +51,13 @@ cd fsp_registry  && uv run pytest -q && uv run ruff check .
 13. **Экспресс-режим теста (для жюри)** — mode=express завершается ≤ 4 вопросов, `mode=express` в результате.
 14. **Рынок вилок** — `market/salary?spec=backend&grade=middle`: медиана по потребностям и приглашениям платформы (p50 from=250000, to=350000 на эталонном сиде).
 
-Финал: «СМОУК ПРОЙДЕН — все 14 шагов зелёные».
+Финал: «СМОУК ПРОЙДЕН — все 17 шагов зелёные».
 
 ## 3. Воспроизводимость
 
 ```bash
 ./scripts/reset-dev.sh   # чистые схемы ph_back/ph_core, стек переподнят, health зелёный
-./scripts/smoke.sh       # 14 шагов — зелёные
+./scripts/smoke.sh       # 17 шагов — зелёные
 ./scripts/seed.sh        # эталон piratehunter-v1: 302 кандидата / 16 компаний / 6 потребностей / 40 приглашений
 ```
 

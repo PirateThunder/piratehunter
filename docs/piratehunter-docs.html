@@ -66,8 +66,9 @@ hr { border: none; border-top: 1px solid #EDEDED; margin: 8pt 0; }
 <pre>cp .env.example .env                               # 1. конфиг (дефолты для dev)
 docker compose --env-file .env up -d --build       # 2. всё: 4 сервиса + PG×2 + Redis
 ./scripts/seed.sh                                  # 3. эталонные демо-данные</pre>
-<p>Открыть http://localhost:56151. OpenAPI backend — http://localhost:64844/docs</p>
-<p>(<code class="mono">BACK_ENV=local</code>). Сквозной смоук: <code class="mono">./scripts/smoke.sh</code> (14 шагов по</p>
+<p>Открыть http://localhost:56151. OpenAPI — <b>https://api.piratehunter.fun/docs</b></p>
+<p>на проде, локально <code class="mono">http://localhost:64844/docs</code> (<code class="mono">BACK_ENV=local</code>).</p>
+<p>Сквозной смоук: <code class="mono">./scripts/smoke.sh</code> (17 шагов по</p>
 <p>живому стеку), сброс стенда: <code class="mono">./scripts/reset-dev.sh</code>. Подробно —</p>
 <p><a href="docs/RUN.md">docs/RUN.md</a>.</p>
 <h3>Демо-аккаунты (dev-login)</h3>
@@ -89,8 +90,8 @@ docker compose --env-file .env up -d --build       # 2. всё: 4 сервиса
 <p>(2 vCPU/4 ГБ): образы переносятся готовыми <code class="mono">docker save | ssh docker load</code></p>
 <p>— <a href="docs/RUN.md">docs/RUN.md</a>.</p>
 <h3>Качество</h3>
-<p>202 автотеста (hunter_core 75 · backend 110 · fsp_registry 17), живой</p>
-<p>смоук 14 шагов, воспроизводимый цикл reset→smoke→seed, детерминированные</p>
+<p>212 автотестов (hunter_core 75 · backend 120 · fsp_registry 17), живой</p>
+<p>смоук 17 шагов, воспроизводимый цикл reset→smoke→seed, детерминированные</p>
 <p>сиды (302 кандидата / 16 компаний / 6 потребностей / 40 приглашений).</p>
 <p>Валидация (PRD §9): стабильность грейда 96.7% (порог 80%), ±1 — 100%</p>
 <p>(порог 97%), Spearman 0.972 (порог 0.85), Precision@5 0.85 (порог 0.8);</p>
@@ -249,7 +250,8 @@ curl localhost:51457/health    # core-api
 curl localhost:52457/health    # fsp-registry
 curl localhost:56151/          # frontend
 curl localhost:52457/fsp/v1/profiles/fsp_001   # синтетический профиль ФСП (или 404)</pre>
-<p>OpenAPI backend — http://localhost:64844/docs (при <code class="mono">BACK_ENV=local</code>).</p>
+<p>OpenAPI backend — <b>https://api.piratehunter.fun/docs</b> (живой Swagger на</p>
+<p>проде) или локально <code class="mono">http://localhost:64844/docs</code> (при <code class="mono">BACK_ENV=local</code>).</p>
 <p>Вход по email-коду: без SMTP код пишется в лог backend</p>
 <p>(<code class="mono">docker compose logs -f backend</code>, поле <code class="mono">dev_code</code>). При</p>
 <p><code class="mono">BACK_AUTH_DEV_LOGIN=1</code> (dev-дефолт) на <code class="mono">/login</code> — кнопка входа</p>
@@ -258,7 +260,7 @@ curl localhost:52457/fsp/v1/profiles/fsp_001   # синтетический пр
 <p>(backend), 51457 (core-api), 52457 (fsp-registry), 55432/55433 (PG),</p>
 <p>56379 (Redis) — для отладки и смоука.</p>
 <h3>Скрипты scripts/</h3>
-<table><thead><tr><th>Скрипт</th><th>Что делает</th></tr></thead><tbody><tr><td><code class="mono">./scripts/reset-dev.sh</code></td><td>Стенд в чистое состояние: стоп backend/core, пересоздание схем <code class="mono">ph_back</code>/<code class="mono">ph_core</code> (DROP SCHEMA), подъём стека, дожди health. <b>Данные стираются.</b></td></tr><tr><td><code class="mono">./scripts/seed.sh</code></td><td>Ресед эталона (PRD §10) одной командой: детерминированный seed <code class="mono">piratehunter-v1</code>, truncate доменных таблиц + очистка снапшотов в core. Перед защитой/после тестов жюри база возвращается к эталону.</td></tr><tr><td><code class="mono">./scripts/smoke.sh</code></td><td>Живой сквозной смоук по HTTP (14 шагов): health → dev-login → email-код → профиль → CAT-тест → потребность → shortlist → скрытость контактов → приглашение с вилкой → accept → OIDC-флоу FSP ID → LLM-парсинг → экспресс-тест → рынок вилок. Требует поднятый стек, <code class="mono">curl</code>, <code class="mono">jq</code>.</td></tr></tbody></table>
+<table><thead><tr><th>Скрипт</th><th>Что делает</th></tr></thead><tbody><tr><td><code class="mono">./scripts/reset-dev.sh</code></td><td>Стенд в чистое состояние: стоп backend/core, пересоздание схем <code class="mono">ph_back</code>/<code class="mono">ph_core</code> (DROP SCHEMA), подъём стека, дожди health. <b>Данные стираются.</b></td></tr><tr><td><code class="mono">./scripts/seed.sh</code></td><td>Ресед эталона (PRD §10) одной командой: детерминированный seed <code class="mono">piratehunter-v1</code>, truncate доменных таблиц + очистка снапшотов в core. Перед защитой/после тестов жюри база возвращается к эталону.</td></tr><tr><td><code class="mono">./scripts/smoke.sh</code></td><td>Живой сквозной смоук по HTTP (17 шагов): health → dev-login → email-код → профиль → CAT-тест → потребность → shortlist → скрытость контактов → приглашение с вилкой → accept → OIDC-флоу FSP ID → LLM-парсинг → экспресс-тест → рынок вилок → публикация вакансии → отклик → контакты инициатора. Требует поднятый стек, <code class="mono">curl</code>, <code class="mono">jq</code>.</td></tr></tbody></table>
 <p>Воспроизводимый цикл: <code class="mono">reset-dev.sh</code> → <code class="mono">smoke.sh</code> (зелёный) → <code class="mono">seed.sh</code>.</p>
 <h3>Деплой на VPS (prod)</h3>
 <p>Целевой стенд: VPS 2 vCPU / 4 ГБ RAM, Ubuntu + Docker + compose-плагин.</p>
@@ -331,13 +333,13 @@ cd fsp_registry  &amp;&amp; uv run pytest -q &amp;&amp; uv run ruff check .</pre
 <p>миграции и репозиторный слой без поднятия PG; core/fsp клиенты</p>
 <p>подменяются фейками, внешних вызовов в тестах нет.</p>
 <h3>2. Живой сквозной смоук — scripts/smoke.sh</h3>
-<p>14 шагов по реальному стеку (<code class="mono">docker compose up</code>), каждый — HTTP-вызов</p>
+<p>17 шагов по реальному стеку (<code class="mono">docker compose up</code>), каждый — HTTP-вызов</p>
 <p>с проверкой результата (<code class="mono">curl</code> + <code class="mono">jq</code>), стоп по первому FAIL:</p>
 <ol><li><b>Health всех сервисов</b> — backend/core-api/fsp-registry <code class="mono">/health</code> + frontend <code class="mono">/</code> и <code class="mono">/login</code>.</li><li><b>Dev-login</b> — демо-аккаунты <code class="mono">candidate-fsp</code> (кандидат с ФСП) и <code class="mono">employer</code>, получение JWT.</li><li><b>Email-код</b> — <code class="mono">auth/email/request</code> → <code class="mono">dev_code</code> (при <code class="mono">BACK_ENV=local</code> без SMTP) → <code class="mono">auth/email/verify</code> → токен.</li><li><b>Профиль кандидата</b> — PUT <code class="mono">/candidate/profile</code> (стек, специализация, заявленный грейд, контакты).</li><li><b>CAT-тест через backend → core-api</b> — старт сессии на middle, цикл ответов до результата <code class="mono">{theta, grade_verified, outcome}</code>.</li><li><b>Компания + потребность</b> — PUT <code class="mono">/employer/company</code>, POST <code class="mono">/employer/needs</code> (backend проксирует LLM-парсинг «мы поняли так»).</li><li><b>Shortlist</b> — GET <code class="mono">/employer/needs/{id}/shortlist</code>: непустая подборка, у каждой строки есть <code class="mono">explanation</code>.</li><li><b>Скрытость контактов</b> — наш кандидат в банке, <code class="mono">contacts: null</code> до accept (privacy-правило §7.6).</li><li><b>Приглашение</b> — без вилки → <b>422</b>; с вилкой 250–350k gross → 201 (инвариант ТЗ).</li><li><b>Accept</b> — кандидат: до accept контакты компании скрыты, после accept раскрываются <b>обеим</b> сторонам (кандидат видит HR-контакты, работодатель — email кандидата).</li><li><b>Полный OIDC-флоу «FSP ID»</b> — redirect-цепочка: <code class="mono">authorize_url</code> → 303 реестра (code+state) → GET-callback на origin фронта → 303 на <code class="mono">/login/callback</code> с refresh-cookie <code class="mono">ph_refresh</code> → <code class="mono">/auth/refresh</code> → access; <code class="mono">users/me</code> подтверждает <code class="mono">fsp_id=fsp_001</code>.</li><li><b>LLM-парсинг потребности</b> — <code class="mono">needs/parse</code> распознаёт «мидла на FastAPI, PG, Redis» → spec=backend, grade=middle (работает и без ключа — детерминированный fallback).</li><li><b>Экспресс-режим теста (для жюри)</b> — mode=express завершается ≤ 4 вопросов, <code class="mono">mode=express</code> в результате.</li><li><b>Рынок вилок</b> — <code class="mono">market/salary?spec=backend&amp;grade=middle</code>: медиана по потребностям и приглашениям платформы (p50 from=250000, to=350000 на эталонном сиде).</li></ol>
-<p>Финал: «СМОУК ПРОЙДЕН — все 14 шагов зелёные».</p>
+<p>Финал: «СМОУК ПРОЙДЕН — все 17 шагов зелёные».</p>
 <h3>3. Воспроизводимость</h3>
 <pre>./scripts/reset-dev.sh   # чистые схемы ph_back/ph_core, стек переподнят, health зелёный
-./scripts/smoke.sh       # 14 шагов — зелёные
+./scripts/smoke.sh       # 17 шагов — зелёные
 ./scripts/seed.sh        # эталон piratehunter-v1: 302 кандидата / 16 компаний / 6 потребностей / 40 приглашений</pre>
 <p>Сиды детерминированы (seed <code class="mono">piratehunter-v1</code>), датасет воспроизводим</p>
 <p>побайтово — перед защитой и после тестов жюри база возвращается к</p>
@@ -594,9 +596,11 @@ BACK_FSP_CLIENT_ID / BACK_FSP_CLIENT_SECRET           # client-конфиг</pre
 <p>заменяется боевым API с тем же контрактом ответа (200/404).</p></div>
 <div class="section"><h1>7. API</h1><h2>API PirateHunter</h2>
 <p>Открытый REST API платформы — <code class="mono">backend /api/v1</code> (JWT). Спецификация —</p>
-<p>OpenAPI (Swagger UI на <code class="mono">/docs</code> при <code class="mono">BACK_ENV=local/staging</code>, в проде</p>
-<p>закрыт). Канонические контракты версионированы (<code class="mono">/api/v1</code>), auth-слой</p>
-<p>готов к публичному API с ключами (roadmap в конце). Internal API</p>
+<p>OpenAPI: <b>живой Swagger UI — https://api.piratehunter.fun/docs</b></p>
+<p>(в проде включается флагом <code class="mono">BACK_DOCS_PUBLIC=1</code>; локально —</p>
+<p><code class="mono">http://localhost:64844/docs</code> при <code class="mono">BACK_ENV=local</code>). Канонические контракты</p>
+<p>версионированы (<code class="mono">/api/v1</code>), auth-слой готов к публичному API с ключами</p>
+<p>(roadmap в конце). Internal API</p>
 <p>core-api (<code class="mono">/internal/*</code>) и fsp_registry (<code class="mono">/fsp/v1</code>, <code class="mono">/oidc/*</code>) наружу не</p>
 <p>выставлены (PRD §4.2) — с ними общается только backend.</p>
 <h3>Аутентификация</h3>

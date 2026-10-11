@@ -40,8 +40,9 @@ docker compose --env-file .env up -d --build       # 2. всё: 4 сервиса
 ./scripts/seed.sh                                  # 3. эталонные демо-данные
 ```
 
-Открыть http://localhost:56151. OpenAPI backend — http://localhost:64844/docs
-(`BACK_ENV=local`). Сквозной смоук: `./scripts/smoke.sh` (14 шагов по
+Открыть http://localhost:56151. OpenAPI — **https://api.piratehunter.fun/docs**
+на проде, локально `http://localhost:64844/docs` (`BACK_ENV=local`).
+Сквозной смоук: `./scripts/smoke.sh` (17 шагов по
 живому стеку), сброс стенда: `./scripts/reset-dev.sh`. Подробно —
 [docs/RUN.md](docs/RUN.md).
 
@@ -84,8 +85,8 @@ docker compose --env-file .env up -d --build       # 2. всё: 4 сервиса
 
 ## Качество
 
-202 автотеста (hunter_core 75 · backend 110 · fsp_registry 17), живой
-смоук 14 шагов, воспроизводимый цикл reset→smoke→seed, детерминированные
+212 автотестов (hunter_core 75 · backend 120 · fsp_registry 17), живой
+смоук 17 шагов, воспроизводимый цикл reset→smoke→seed, детерминированные
 сиды (302 кандидата / 16 компаний / 6 потребностей / 40 приглашений).
 Валидация (PRD §9): стабильность грейда 96.7% (порог 80%), ±1 — 100%
 (порог 97%), Spearman 0.972 (порог 0.85), Precision@5 0.85 (порог 0.8);
