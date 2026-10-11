@@ -1,4 +1,6 @@
-out/
+out/*
+!out/validation/
+!out/validation/**
 .venv/
 __pycache__/
 .ruff_cache/

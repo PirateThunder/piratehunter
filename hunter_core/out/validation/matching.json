@@ -1,0 +1,1540 @@
+{
+  "params": {
+    "seed": 11,
+    "n_candidates": 50,
+    "n_needs": 20,
+    "relevance_rule": "spec совпал И grade >= требуемого И stack_overlap >= 0.5",
+    "stack_overlap_min": 0.5
+  },
+  "metrics": {
+    "precision_at_5": 0.85,
+    "ndcg_at_10": 0.9446,
+    "needs_evaluated": 20
+  },
+  "threshold": {
+    "precision_at_5 >= ": 0.8
+  },
+  "overall_pass": true,
+  "per_need": [
+    {
+      "need_id": "need-000",
+      "spec": "backend",
+      "grade": "middle",
+      "pool_size": 8,
+      "relevant_in_pool": 6,
+      "precision_at_5": 0.8,
+      "ndcg_at_10": 0.9582,
+      "top5": [
+        {
+          "candidate_id": "cand-024",
+          "score": 0.8065,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-045",
+          "score": 0.6263,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-039",
+          "score": 0.5249,
+          "relevant": true,
+          "grade": "middle",
+          "verified": false
+        },
+        {
+          "candidate_id": "cand-036",
+          "score": 0.5037,
+          "relevant": false,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-000",
+          "score": 0.4827,
+          "relevant": true,
+          "grade": "middle",
+          "verified": false
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.606,
+          "contribution": 0.2424,
+          "human_text": "тест: грейд middle, θ=1.41 → 0.61"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 0.9167,
+          "contribution": 0.275,
+          "human_text": "стек: совпало must 3/3, nice 2/3 → 0.92"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 1.0,
+          "contribution": 0.2,
+          "human_text": "достижения ФСП: суммарный счёт 1.00"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.8909,
+          "contribution": 0.0891,
+          "human_text": "свежесть профиля: активность 5 дн. назад → 0.89"
+        }
+      ]
+    },
+    {
+      "need_id": "need-001",
+      "spec": "frontend",
+      "grade": "middle",
+      "pool_size": 7,
+      "relevant_in_pool": 6,
+      "precision_at_5": 1.0,
+      "ndcg_at_10": 0.9931,
+      "top5": [
+        {
+          "candidate_id": "cand-001",
+          "score": 0.7296,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-019",
+          "score": 0.7044,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-013",
+          "score": 0.6796,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-028",
+          "score": 0.5434,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-040",
+          "score": 0.5119,
+          "relevant": true,
+          "grade": "senior",
+          "verified": false
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.4825,
+          "contribution": 0.193,
+          "human_text": "тест: грейд senior, θ=2.96 → 0.48"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 0.875,
+          "contribution": 0.2625,
+          "human_text": "стек: совпало must 2/2, nice 1/2 → 0.88"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 1.0,
+          "contribution": 0.2,
+          "human_text": "достижения ФСП: суммарный счёт 1.00"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.7405,
+          "contribution": 0.0741,
+          "human_text": "свежесть профиля: активность 13 дн. назад → 0.74"
+        }
+      ]
+    },
+    {
+      "need_id": "need-002",
+      "spec": "qa",
+      "grade": "middle",
+      "pool_size": 9,
+      "relevant_in_pool": 9,
+      "precision_at_5": 1.0,
+      "ndcg_at_10": 1.0,
+      "top5": [
+        {
+          "candidate_id": "cand-047",
+          "score": 0.8298,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-038",
+          "score": 0.7714,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-035",
+          "score": 0.7264,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-011",
+          "score": 0.7141,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-044",
+          "score": 0.6092,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.8747,
+          "contribution": 0.3499,
+          "human_text": "тест: грейд middle, θ=1.81 → 0.87"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 0.875,
+          "contribution": 0.2625,
+          "human_text": "стек: совпало must 2/2, nice 1/2 → 0.88"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 0.725,
+          "contribution": 0.145,
+          "human_text": "достижения ФСП: суммарный счёт 0.72"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.7236,
+          "contribution": 0.0724,
+          "human_text": "свежесть профиля: активность 14 дн. назад → 0.72"
+        }
+      ]
+    },
+    {
+      "need_id": "need-003",
+      "spec": "backend",
+      "grade": "junior",
+      "pool_size": 16,
+      "relevant_in_pool": 12,
+      "precision_at_5": 0.8,
+      "ndcg_at_10": 0.8416,
+      "top5": [
+        {
+          "candidate_id": "cand-024",
+          "score": 0.8065,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-003",
+          "score": 0.7894,
+          "relevant": true,
+          "grade": "junior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-045",
+          "score": 0.7013,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-009",
+          "score": 0.6852,
+          "relevant": false,
+          "grade": "junior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-048",
+          "score": 0.6335,
+          "relevant": true,
+          "grade": "junior",
+          "verified": false
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.606,
+          "contribution": 0.2424,
+          "human_text": "тест: грейд middle, θ=1.41 → 0.61"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 0.9167,
+          "contribution": 0.275,
+          "human_text": "стек: совпало must 3/3, nice 2/3 → 0.92"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 1.0,
+          "contribution": 0.2,
+          "human_text": "достижения ФСП: суммарный счёт 1.00"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.8909,
+          "contribution": 0.0891,
+          "human_text": "свежесть профиля: активность 5 дн. назад → 0.89"
+        }
+      ]
+    },
+    {
+      "need_id": "need-004",
+      "spec": "frontend",
+      "grade": "senior",
+      "pool_size": 6,
+      "relevant_in_pool": 4,
+      "precision_at_5": 0.8,
+      "ndcg_at_10": 0.9558,
+      "top5": [
+        {
+          "candidate_id": "cand-001",
+          "score": 0.7338,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-013",
+          "score": 0.6838,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-019",
+          "score": 0.6419,
+          "relevant": false,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-040",
+          "score": 0.6286,
+          "relevant": true,
+          "grade": "senior",
+          "verified": false
+        },
+        {
+          "candidate_id": "cand-028",
+          "score": 0.5476,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.4825,
+          "contribution": 0.193,
+          "human_text": "тест: грейд senior, θ=2.96 → 0.48"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 0.8889,
+          "contribution": 0.2667,
+          "human_text": "стек: совпало must 2/2, nice 2/3 → 0.89"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 1.0,
+          "contribution": 0.2,
+          "human_text": "достижения ФСП: суммарный счёт 1.00"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.7405,
+          "contribution": 0.0741,
+          "human_text": "свежесть профиля: активность 13 дн. назад → 0.74"
+        }
+      ]
+    },
+    {
+      "need_id": "need-005",
+      "spec": "qa",
+      "grade": "junior",
+      "pool_size": 13,
+      "relevant_in_pool": 10,
+      "precision_at_5": 1.0,
+      "ndcg_at_10": 0.9266,
+      "top5": [
+        {
+          "candidate_id": "cand-020",
+          "score": 0.7707,
+          "relevant": true,
+          "grade": "junior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-038",
+          "score": 0.7339,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-035",
+          "score": 0.7264,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-017",
+          "score": 0.6943,
+          "relevant": true,
+          "grade": "junior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-008",
+          "score": 0.64,
+          "relevant": true,
+          "grade": "junior",
+          "verified": true
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.438,
+          "contribution": 0.1752,
+          "human_text": "тест: грейд junior, θ=-0.34 → 0.44"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 1.0,
+          "contribution": 0.3,
+          "human_text": "стек: совпало must 2/2, nice 2/2 → 1.00"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 1.0,
+          "contribution": 0.2,
+          "human_text": "достижения ФСП: суммарный счёт 1.00"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.9548,
+          "contribution": 0.0955,
+          "human_text": "свежесть профиля: активность 2 дн. назад → 0.95"
+        }
+      ]
+    },
+    {
+      "need_id": "need-006",
+      "spec": "backend",
+      "grade": "middle",
+      "pool_size": 8,
+      "relevant_in_pool": 5,
+      "precision_at_5": 1.0,
+      "ndcg_at_10": 1.0,
+      "top5": [
+        {
+          "candidate_id": "cand-024",
+          "score": 0.7982,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-045",
+          "score": 0.718,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-036",
+          "score": 0.587,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-018",
+          "score": 0.5461,
+          "relevant": true,
+          "grade": "middle",
+          "verified": false
+        },
+        {
+          "candidate_id": "cand-000",
+          "score": 0.5244,
+          "relevant": true,
+          "grade": "middle",
+          "verified": false
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.606,
+          "contribution": 0.2424,
+          "human_text": "тест: грейд middle, θ=1.41 → 0.61"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 0.8889,
+          "contribution": 0.2667,
+          "human_text": "стек: совпало must 2/2, nice 2/3 → 0.89"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 1.0,
+          "contribution": 0.2,
+          "human_text": "достижения ФСП: суммарный счёт 1.00"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.8909,
+          "contribution": 0.0891,
+          "human_text": "свежесть профиля: активность 5 дн. назад → 0.89"
+        }
+      ]
+    },
+    {
+      "need_id": "need-007",
+      "spec": "frontend",
+      "grade": "middle",
+      "pool_size": 7,
+      "relevant_in_pool": 7,
+      "precision_at_5": 1.0,
+      "ndcg_at_10": 1.0,
+      "top5": [
+        {
+          "candidate_id": "cand-001",
+          "score": 0.7296,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-019",
+          "score": 0.6669,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-040",
+          "score": 0.6244,
+          "relevant": true,
+          "grade": "senior",
+          "verified": false
+        },
+        {
+          "candidate_id": "cand-013",
+          "score": 0.5671,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-028",
+          "score": 0.5434,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.4825,
+          "contribution": 0.193,
+          "human_text": "тест: грейд senior, θ=2.96 → 0.48"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 0.875,
+          "contribution": 0.2625,
+          "human_text": "стек: совпало must 2/2, nice 1/2 → 0.88"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 1.0,
+          "contribution": 0.2,
+          "human_text": "достижения ФСП: суммарный счёт 1.00"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.7405,
+          "contribution": 0.0741,
+          "human_text": "свежесть профиля: активность 13 дн. назад → 0.74"
+        }
+      ]
+    },
+    {
+      "need_id": "need-008",
+      "spec": "qa",
+      "grade": "junior",
+      "pool_size": 13,
+      "relevant_in_pool": 12,
+      "precision_at_5": 1.0,
+      "ndcg_at_10": 0.9266,
+      "top5": [
+        {
+          "candidate_id": "cand-038",
+          "score": 0.7714,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-017",
+          "score": 0.7693,
+          "relevant": true,
+          "grade": "junior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-047",
+          "score": 0.7173,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-011",
+          "score": 0.7141,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-008",
+          "score": 0.64,
+          "relevant": true,
+          "grade": "junior",
+          "verified": true
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.8553,
+          "contribution": 0.3421,
+          "human_text": "тест: грейд middle, θ=1.78 → 0.86"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 0.875,
+          "contribution": 0.2625,
+          "human_text": "стек: совпало must 2/2, nice 1/2 → 0.88"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 0.7,
+          "contribution": 0.14,
+          "human_text": "достижения ФСП: суммарный счёт 0.70"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.2679,
+          "contribution": 0.0268,
+          "human_text": "свежесть профиля: активность 57 дн. назад → 0.27"
+        }
+      ]
+    },
+    {
+      "need_id": "need-009",
+      "spec": "backend",
+      "grade": "junior",
+      "pool_size": 16,
+      "relevant_in_pool": 5,
+      "precision_at_5": 0.6,
+      "ndcg_at_10": 0.8954,
+      "top5": [
+        {
+          "candidate_id": "cand-024",
+          "score": 0.7982,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-003",
+          "score": 0.7727,
+          "relevant": true,
+          "grade": "junior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-045",
+          "score": 0.6513,
+          "relevant": false,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-009",
+          "score": 0.6352,
+          "relevant": false,
+          "grade": "junior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-036",
+          "score": 0.587,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.606,
+          "contribution": 0.2424,
+          "human_text": "тест: грейд middle, θ=1.41 → 0.61"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 0.8889,
+          "contribution": 0.2667,
+          "human_text": "стек: совпало must 2/2, nice 2/3 → 0.89"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 1.0,
+          "contribution": 0.2,
+          "human_text": "достижения ФСП: суммарный счёт 1.00"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.8909,
+          "contribution": 0.0891,
+          "human_text": "свежесть профиля: активность 5 дн. назад → 0.89"
+        }
+      ]
+    },
+    {
+      "need_id": "need-010",
+      "spec": "frontend",
+      "grade": "middle",
+      "pool_size": 7,
+      "relevant_in_pool": 6,
+      "precision_at_5": 1.0,
+      "ndcg_at_10": 1.0,
+      "top5": [
+        {
+          "candidate_id": "cand-001",
+          "score": 0.7296,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-019",
+          "score": 0.6669,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-028",
+          "score": 0.5809,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-013",
+          "score": 0.5671,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-040",
+          "score": 0.5119,
+          "relevant": true,
+          "grade": "senior",
+          "verified": false
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.4825,
+          "contribution": 0.193,
+          "human_text": "тест: грейд senior, θ=2.96 → 0.48"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 0.875,
+          "contribution": 0.2625,
+          "human_text": "стек: совпало must 2/2, nice 1/2 → 0.88"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 1.0,
+          "contribution": 0.2,
+          "human_text": "достижения ФСП: суммарный счёт 1.00"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.7405,
+          "contribution": 0.0741,
+          "human_text": "свежесть профиля: активность 13 дн. назад → 0.74"
+        }
+      ]
+    },
+    {
+      "need_id": "need-011",
+      "spec": "qa",
+      "grade": "junior",
+      "pool_size": 13,
+      "relevant_in_pool": 11,
+      "precision_at_5": 0.8,
+      "ndcg_at_10": 0.9149,
+      "top5": [
+        {
+          "candidate_id": "cand-038",
+          "score": 0.7589,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-017",
+          "score": 0.7568,
+          "relevant": true,
+          "grade": "junior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-011",
+          "score": 0.7141,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-035",
+          "score": 0.6764,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-047",
+          "score": 0.6673,
+          "relevant": false,
+          "grade": "middle",
+          "verified": true
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.8553,
+          "contribution": 0.3421,
+          "human_text": "тест: грейд middle, θ=1.78 → 0.86"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 0.8333,
+          "contribution": 0.25,
+          "human_text": "стек: совпало must 3/3, nice 1/3 → 0.83"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 0.7,
+          "contribution": 0.14,
+          "human_text": "достижения ФСП: суммарный счёт 0.70"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.2679,
+          "contribution": 0.0268,
+          "human_text": "свежесть профиля: активность 57 дн. назад → 0.27"
+        }
+      ]
+    },
+    {
+      "need_id": "need-012",
+      "spec": "backend",
+      "grade": "junior",
+      "pool_size": 16,
+      "relevant_in_pool": 12,
+      "precision_at_5": 0.8,
+      "ndcg_at_10": 0.9149,
+      "top5": [
+        {
+          "candidate_id": "cand-024",
+          "score": 0.8315,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-003",
+          "score": 0.8121,
+          "relevant": true,
+          "grade": "junior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-045",
+          "score": 0.6422,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-048",
+          "score": 0.629,
+          "relevant": true,
+          "grade": "junior",
+          "verified": false
+        },
+        {
+          "candidate_id": "cand-009",
+          "score": 0.617,
+          "relevant": false,
+          "grade": "junior",
+          "verified": true
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.606,
+          "contribution": 0.2424,
+          "human_text": "тест: грейд middle, θ=1.41 → 0.61"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 1.0,
+          "contribution": 0.3,
+          "human_text": "стек: совпало must 3/3, nice 2/2 → 1.00"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 1.0,
+          "contribution": 0.2,
+          "human_text": "достижения ФСП: суммарный счёт 1.00"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.8909,
+          "contribution": 0.0891,
+          "human_text": "свежесть профиля: активность 5 дн. назад → 0.89"
+        }
+      ]
+    },
+    {
+      "need_id": "need-013",
+      "spec": "frontend",
+      "grade": "middle",
+      "pool_size": 7,
+      "relevant_in_pool": 5,
+      "precision_at_5": 0.8,
+      "ndcg_at_10": 0.9747,
+      "top5": [
+        {
+          "candidate_id": "cand-001",
+          "score": 0.7296,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-019",
+          "score": 0.7044,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-028",
+          "score": 0.5809,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-013",
+          "score": 0.5296,
+          "relevant": false,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-040",
+          "score": 0.5119,
+          "relevant": true,
+          "grade": "senior",
+          "verified": false
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.4825,
+          "contribution": 0.193,
+          "human_text": "тест: грейд senior, θ=2.96 → 0.48"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 0.875,
+          "contribution": 0.2625,
+          "human_text": "стек: совпало must 2/2, nice 1/2 → 0.88"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 1.0,
+          "contribution": 0.2,
+          "human_text": "достижения ФСП: суммарный счёт 1.00"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.7405,
+          "contribution": 0.0741,
+          "human_text": "свежесть профиля: активность 13 дн. назад → 0.74"
+        }
+      ]
+    },
+    {
+      "need_id": "need-014",
+      "spec": "qa",
+      "grade": "middle",
+      "pool_size": 9,
+      "relevant_in_pool": 4,
+      "precision_at_5": 0.4,
+      "ndcg_at_10": 0.8036,
+      "top5": [
+        {
+          "candidate_id": "cand-035",
+          "score": 0.7347,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-038",
+          "score": 0.7089,
+          "relevant": false,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-011",
+          "score": 0.6224,
+          "relevant": false,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-047",
+          "score": 0.6006,
+          "relevant": false,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-026",
+          "score": 0.5555,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.8927,
+          "contribution": 0.3571,
+          "human_text": "тест: грейд middle, θ=1.84 → 0.89"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 0.7778,
+          "contribution": 0.2333,
+          "human_text": "стек: совпало must 2/2, nice 1/3 → 0.78"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 0.2438,
+          "contribution": 0.0488,
+          "human_text": "достижения ФСП: суммарный счёт 0.24"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.9548,
+          "contribution": 0.0955,
+          "human_text": "свежесть профиля: активность 2 дн. назад → 0.95"
+        }
+      ]
+    },
+    {
+      "need_id": "need-015",
+      "spec": "backend",
+      "grade": "junior",
+      "pool_size": 16,
+      "relevant_in_pool": 14,
+      "precision_at_5": 0.8,
+      "ndcg_at_10": 0.89,
+      "top5": [
+        {
+          "candidate_id": "cand-003",
+          "score": 0.8019,
+          "relevant": true,
+          "grade": "junior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-024",
+          "score": 0.794,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-009",
+          "score": 0.6477,
+          "relevant": false,
+          "grade": "junior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-048",
+          "score": 0.646,
+          "relevant": true,
+          "grade": "junior",
+          "verified": false
+        },
+        {
+          "candidate_id": "cand-015",
+          "score": 0.6137,
+          "relevant": true,
+          "grade": "junior",
+          "verified": true
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.6633,
+          "contribution": 0.2653,
+          "human_text": "тест: грейд junior, θ=-0.01 → 0.66"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 0.875,
+          "contribution": 0.2625,
+          "human_text": "стек: совпало must 2/2, nice 1/2 → 0.88"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 1.0,
+          "contribution": 0.2,
+          "human_text": "достижения ФСП: суммарный счёт 1.00"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.7405,
+          "contribution": 0.0741,
+          "human_text": "свежесть профиля: активность 13 дн. назад → 0.74"
+        }
+      ]
+    },
+    {
+      "need_id": "need-016",
+      "spec": "frontend",
+      "grade": "middle",
+      "pool_size": 7,
+      "relevant_in_pool": 7,
+      "precision_at_5": 1.0,
+      "ndcg_at_10": 1.0,
+      "top5": [
+        {
+          "candidate_id": "cand-001",
+          "score": 0.6921,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-013",
+          "score": 0.6796,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-019",
+          "score": 0.6669,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-040",
+          "score": 0.5869,
+          "relevant": true,
+          "grade": "senior",
+          "verified": false
+        },
+        {
+          "candidate_id": "cand-016",
+          "score": 0.56,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.4825,
+          "contribution": 0.193,
+          "human_text": "тест: грейд senior, θ=2.96 → 0.48"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 0.75,
+          "contribution": 0.225,
+          "human_text": "стек: совпало must 2/2, nice 0/2 → 0.75"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 1.0,
+          "contribution": 0.2,
+          "human_text": "достижения ФСП: суммарный счёт 1.00"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.7405,
+          "contribution": 0.0741,
+          "human_text": "свежесть профиля: активность 13 дн. назад → 0.74"
+        }
+      ]
+    },
+    {
+      "need_id": "need-017",
+      "spec": "qa",
+      "grade": "middle",
+      "pool_size": 9,
+      "relevant_in_pool": 7,
+      "precision_at_5": 0.8,
+      "ndcg_at_10": 0.9683,
+      "top5": [
+        {
+          "candidate_id": "cand-011",
+          "score": 0.7618,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-038",
+          "score": 0.7544,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-035",
+          "score": 0.6923,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-047",
+          "score": 0.6764,
+          "relevant": false,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-044",
+          "score": 0.6194,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.6493,
+          "contribution": 0.2597,
+          "human_text": "тест: грейд middle, θ=1.47 → 0.65"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 0.9091,
+          "contribution": 0.2727,
+          "human_text": "стек: совпало must 3/3, nice 1/2 → 0.91"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 1.0,
+          "contribution": 0.2,
+          "human_text": "достижения ФСП: суммарный счёт 1.00"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.2939,
+          "contribution": 0.0294,
+          "human_text": "свежесть профиля: активность 53 дн. назад → 0.29"
+        }
+      ]
+    },
+    {
+      "need_id": "need-018",
+      "spec": "backend",
+      "grade": "junior",
+      "pool_size": 16,
+      "relevant_in_pool": 6,
+      "precision_at_5": 0.6,
+      "ndcg_at_10": 0.928,
+      "top5": [
+        {
+          "candidate_id": "cand-024",
+          "score": 0.8042,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-045",
+          "score": 0.724,
+          "relevant": true,
+          "grade": "middle",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-003",
+          "score": 0.703,
+          "relevant": false,
+          "grade": "junior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-048",
+          "score": 0.6562,
+          "relevant": true,
+          "grade": "junior",
+          "verified": false
+        },
+        {
+          "candidate_id": "cand-009",
+          "score": 0.617,
+          "relevant": false,
+          "grade": "junior",
+          "verified": true
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.606,
+          "contribution": 0.2424,
+          "human_text": "тест: грейд middle, θ=1.41 → 0.61"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 0.9091,
+          "contribution": 0.2727,
+          "human_text": "стек: совпало must 3/3, nice 1/2 → 0.91"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 1.0,
+          "contribution": 0.2,
+          "human_text": "достижения ФСП: суммарный счёт 1.00"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.8909,
+          "contribution": 0.0891,
+          "human_text": "свежесть профиля: активность 5 дн. назад → 0.89"
+        }
+      ]
+    },
+    {
+      "need_id": "need-019",
+      "spec": "frontend",
+      "grade": "senior",
+      "pool_size": 6,
+      "relevant_in_pool": 6,
+      "precision_at_5": 1.0,
+      "ndcg_at_10": 1.0,
+      "top5": [
+        {
+          "candidate_id": "cand-001",
+          "score": 0.7296,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-013",
+          "score": 0.7171,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-019",
+          "score": 0.6669,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        },
+        {
+          "candidate_id": "cand-040",
+          "score": 0.6244,
+          "relevant": true,
+          "grade": "senior",
+          "verified": false
+        },
+        {
+          "candidate_id": "cand-028",
+          "score": 0.5434,
+          "relevant": true,
+          "grade": "senior",
+          "verified": true
+        }
+      ],
+      "top1_explanation": [
+        {
+          "factor": "test",
+          "weight": 0.4,
+          "value": 0.4825,
+          "contribution": 0.193,
+          "human_text": "тест: грейд senior, θ=2.96 → 0.48"
+        },
+        {
+          "factor": "stack",
+          "weight": 0.3,
+          "value": 0.875,
+          "contribution": 0.2625,
+          "human_text": "стек: совпало must 2/2, nice 1/2 → 0.88"
+        },
+        {
+          "factor": "fsp",
+          "weight": 0.2,
+          "value": 1.0,
+          "contribution": 0.2,
+          "human_text": "достижения ФСП: суммарный счёт 1.00"
+        },
+        {
+          "factor": "freshness",
+          "weight": 0.1,
+          "value": 0.7405,
+          "contribution": 0.0741,
+          "human_text": "свежесть профиля: активность 13 дн. назад → 0.74"
+        }
+      ]
+    }
+  ]
+}

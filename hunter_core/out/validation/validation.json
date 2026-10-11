@@ -1,0 +1,194 @@
+{
+  "params": {
+    "n_agents": 60,
+    "repeats": 2,
+    "spec": "backend",
+    "mode": "full",
+    "seed": 42,
+    "k0": 0.4,
+    "bank_sizes": [
+      28,
+      28
+    ]
+  },
+  "metrics": {
+    "stability_exact": 0.9667,
+    "stability_pm1": 1.0,
+    "spearman": 0.9718,
+    "adjacent_confusion": 0.0167,
+    "medians_by_true_grade": {
+      "intern": -2.233,
+      "junior": -0.109,
+      "middle": 1.226,
+      "senior": 2.973
+    },
+    "medians_monotonic": true,
+    "confusion_matrix": [
+      [
+        30,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        29,
+        1,
+        0
+      ],
+      [
+        0,
+        1,
+        29,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        30
+      ]
+    ],
+    "instance_equivalence": {
+      "k_templates": 10,
+      "n_seeds": 50,
+      "n_agents": 100,
+      "theta": 1.0,
+      "broken_instances": 0,
+      "mean_share_outside_ci": 0.042,
+      "per_template": [
+        {
+          "template_id": "sql.databases.002",
+          "beta": 1.2,
+          "p_expected": 0.4551,
+          "seeds_outside_ci": 1,
+          "n_seeds": 50,
+          "share_outside": 0.02
+        },
+        {
+          "template_id": "mcq.algorithms.003",
+          "beta": -0.6,
+          "p_expected": 0.7988,
+          "seeds_outside_ci": 4,
+          "n_seeds": 50,
+          "share_outside": 0.08
+        },
+        {
+          "template_id": "mcq.algorithms.000",
+          "beta": 2.4,
+          "p_expected": 0.228,
+          "seeds_outside_ci": 1,
+          "n_seeds": 50,
+          "share_outside": 0.02
+        },
+        {
+          "template_id": "sql.sql.000",
+          "beta": 1.3,
+          "p_expected": 0.433,
+          "seeds_outside_ci": 1,
+          "n_seeds": 50,
+          "share_outside": 0.02
+        },
+        {
+          "template_id": "mcq.concurrency.002",
+          "beta": 0.9,
+          "p_expected": 0.5225,
+          "seeds_outside_ci": 3,
+          "n_seeds": 50,
+          "share_outside": 0.06
+        },
+        {
+          "template_id": "mcq.concurrency.001",
+          "beta": 0.5,
+          "p_expected": 0.6102,
+          "seeds_outside_ci": 3,
+          "n_seeds": 50,
+          "share_outside": 0.06
+        },
+        {
+          "template_id": "sql.databases.004",
+          "beta": 0.2,
+          "p_expected": 0.671,
+          "seeds_outside_ci": 3,
+          "n_seeds": 50,
+          "share_outside": 0.06
+        },
+        {
+          "template_id": "mcq.algorithms.004",
+          "beta": 0.1,
+          "p_expected": 0.6899,
+          "seeds_outside_ci": 2,
+          "n_seeds": 50,
+          "share_outside": 0.04
+        },
+        {
+          "template_id": "sql.sql.003",
+          "beta": 0.7,
+          "p_expected": 0.567,
+          "seeds_outside_ci": 2,
+          "n_seeds": 50,
+          "share_outside": 0.04
+        },
+        {
+          "template_id": "mcq.python.005",
+          "beta": 1.1,
+          "p_expected": 0.4775,
+          "seeds_outside_ci": 1,
+          "n_seeds": 50,
+          "share_outside": 0.02
+        }
+      ]
+    },
+    "beta_calibration": {
+      "beta_start": 1.2,
+      "beta_true": 0.4,
+      "beta_final": 0.474,
+      "beta_empirical": 0.349,
+      "error_vs_empirical": 0.125,
+      "iterations": 40
+    },
+    "session_overlap": {
+      "pairs": 1770,
+      "mean_jaccard": 0.3052
+    }
+  },
+  "thresholds": [
+    {
+      "name": "stability_exact",
+      "value": 0.9667,
+      "target": ">= 0.8",
+      "pass": true
+    },
+    {
+      "name": "stability_pm1",
+      "value": 1.0,
+      "target": ">= 0.97",
+      "pass": true
+    },
+    {
+      "name": "spearman",
+      "value": 0.9718,
+      "target": ">= 0.85",
+      "pass": true
+    },
+    {
+      "name": "adjacent_confusion",
+      "value": 0.0167,
+      "target": "< 0.15",
+      "pass": true
+    },
+    {
+      "name": "instances_outside_ci",
+      "value": 0.042,
+      "target": "<= 0.15",
+      "pass": true
+    },
+    {
+      "name": "beta_calibration_error",
+      "value": 0.125,
+      "target": "<= 0.3",
+      "pass": true
+    }
+  ],
+  "overall_pass": true
+}

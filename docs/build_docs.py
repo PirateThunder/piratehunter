@@ -28,11 +28,49 @@ def inline(text: str) -> str:
     text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
     text = re.sub(r"(?<!\w)`([^`]+?)`(?!\w)", r'<code class="mono">\1</code>', text)
     text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', text)
+    # голые URL — в кликабельные ссылки (кроме уже обёрнутых в href="…")
+    text = re.sub(
+        r'(?<!href=")(?<!">)(https?://[^\s<>")\]]+)',
+        r'<a href="\1">\1</a>',
+        text,
+    )
+    # относительные ссылки в PDF не работают — переводим их на GitHub
+    text = re.sub(
+        r'href="(?!https?://|mailto:|#)([^"]+)"',
+        lambda m: 'href="%s"' % _repo_url(m.group(1)),
+        text,
+    )
     return text
 
 
-def md_to_html(md: str) -> str:
+def _repo_url(path: str) -> str:
+    """Относительный путь → абсолютный GitHub-URL. Резолвим относительно
+    директории исходного md; если такого файла в репо нет — пробуем путь
+    от корня репо."""
+    raw = path.rstrip("/") or "."
+    candidates = [
+        (Path(_BASE) / raw) if _BASE != "." else Path(raw),
+        Path(raw),
+    ]
+    resolved = None
+    for cand in candidates:
+        norm = Path(*[part for part in cand.parts if part != ".."]).as_posix()
+        if (ROOT / norm).exists():
+            resolved = norm
+            break
+    if resolved is None:
+        resolved = candidates[0].as_posix()
+    kind = "blob" if "." in Path(resolved).name else "tree"
+    return f"https://github.com/PirateThunder/piratehunter/{kind}/master/{resolved}"
+
+
+_BASE = "."  # директория текущего md относительно корня репо (для ссылок)
+
+
+def md_to_html(md: str, base: str = ".") -> str:
     """Минимальный md→html: заголовки, таблицы, списки, код, параграфы."""
+    global _BASE
+    _BASE = base
     lines = md.splitlines()
     out: list[str] = []
     i = 0
@@ -140,15 +178,19 @@ def main() -> None:
         "работодатель сам находит кандидата в категоризованной базе "
         "(специализация × подтверждённый тестом грейд)</div>"
         '<div class="meta">'
-        "<p><b>Живой сервис:</b> https://piratehunter.fun</p>"
-        "<p><b>OpenAPI:</b> /docs на backend (BACK_ENV=local)</p>"
-        "<p><b>Репозиторий:</b> публичный GitHub (см. README)</p>"
+        '<p><b>Живой сервис:</b> '
+        '<a href="https://piratehunter.fun">https://piratehunter.fun</a></p>'
+        '<p><b>OpenAPI (Swagger UI):</b> '
+        '<a href="https://api.piratehunter.fun/docs">https://api.piratehunter.fun/docs</a></p>'
+        '<p><b>Репозиторий:</b> '
+        '<a href="https://github.com/PirateThunder/piratehunter">'
+        'github.com/PirateThunder/piratehunter</a></p>'
         "<p><b>Дата сборки:</b> 11 октября 2026</p>"
         "</div></div>",
     ]
     for rel, title in SOURCES:
         body = (ROOT / rel).read_text(encoding="utf-8")
-        block = md_to_html(body)
+        block = md_to_html(body, base=str(Path(rel).parent))
         if title:
             block = f'<div class="section"><h1>{html.escape(title)}</h1>{block}</div>'
         else:

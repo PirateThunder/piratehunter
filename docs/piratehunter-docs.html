@@ -32,7 +32,7 @@ hr { border: none; border-top: 1px solid #EDEDED; margin: 8pt 0; }
 .pagebreak { page-break-before: always; }
 .section { page-break-before: always; }
 </style></head><body>
-<div class="cover"><div class="brand">PirateHunter · трек ФСП · ЛЦТ 2026</div><h1>Техническая документация</h1><div class="sub">Платформа-агрегатор ИТ-вакансий с обратной механикой:<br>работодатель сам находит кандидата в категоризованной базе (специализация × подтверждённый тестом грейд)</div><div class="meta"><p><b>Живой сервис:</b> https://piratehunter.fun</p><p><b>OpenAPI:</b> /docs на backend (BACK_ENV=local)</p><p><b>Репозиторий:</b> публичный GitHub (см. README)</p><p><b>Дата сборки:</b> 11 октября 2026</p></div></div>
+<div class="cover"><div class="brand">PirateHunter · трек ФСП · ЛЦТ 2026</div><h1>Техническая документация</h1><div class="sub">Платформа-агрегатор ИТ-вакансий с обратной механикой:<br>работодатель сам находит кандидата в категоризованной базе (специализация × подтверждённый тестом грейд)</div><div class="meta"><p><b>Живой сервис:</b> <a href="https://piratehunter.fun">https://piratehunter.fun</a></p><p><b>OpenAPI (Swagger UI):</b> <a href="https://api.piratehunter.fun/docs">https://api.piratehunter.fun/docs</a></p><p><b>Репозиторий:</b> <a href="https://github.com/PirateThunder/piratehunter">github.com/PirateThunder/piratehunter</a></p><p><b>Дата сборки:</b> 11 октября 2026</p></div></div>
 <div class="section"><h2>PirateHunter</h2>
 <p>Платформа подбора ИТ-специалистов с <b>обратной механикой</b>: работодатель</p>
 <p>находит кандидата сам. Кандидаты автоматически категоризуются по</p>
@@ -46,11 +46,11 @@ hr { border: none; border-top: 1px solid #EDEDED; margin: 8pt 0; }
 <p>приглашения. Достижения ФСП влияют на ранжирование внутри категории,</p>
 <p>но не на грейд; кейс «нет истории ФСП» — первоклассный: профиль</p>
 <p>показывается со статусом, участвует в подборке без буста.</p>
-<p>Кейс ФСП (ЛЦТ 2026, спец. трек). <b>Живой сервис: https://piratehunter.fun</b>.</p>
-<p>Репозиторий: https://github.com/PirateThunder/piratehunter</p>
+<p>Кейс ФСП (ЛЦТ 2026, спец. трек). <b>Живой сервис: <a href="https://piratehunter.fun">https://piratehunter.fun</a></b>.</p>
+<p>Репозиторий: <a href="https://github.com/PirateThunder/piratehunter">https://github.com/PirateThunder/piratehunter</a></p>
 <p>(публичный). Источник правды по</p>
-<p>продукту — <a href="PRD.md">PRD.md</a>; материалы кейса (ТЗ, брендбук) — в</p>
-<p><code class="mono">materials/</code> (не в git). Техническая документация — <a href="docs/">docs/</a></p>
+<p>продукту — <a href="https://github.com/PirateThunder/piratehunter/blob/master/PRD.md">PRD.md</a>; материалы кейса (ТЗ, брендбук) — в</p>
+<p><code class="mono">materials/</code> (не в git). Техническая документация — <a href="https://github.com/PirateThunder/piratehunter/tree/master/docs">docs/</a></p>
 <p>(ARCHITECTURE, RUN, TESTING, VALIDATION, MATCHING, FSP-INTEGRATION, API,</p>
 <p>ANTIFRAUD-ATS; единый PDF собирается <code class="mono">docs/build_docs.py</code>).</p>
 <p><b>Стек:</b> Python 3.13 · FastAPI · Pydantic v2 · SQLAlchemy 2 (async) ·</p>
@@ -61,16 +61,16 @@ hr { border: none; border-top: 1px solid #EDEDED; margin: 8pt 0; }
 <p><b>152-ФЗ / data residency:</b> весь контур — хостинг (Selectel, ЦОД РФ) и</p>
 <p>LLM (Cloud.ru, ЦОД РФ) — в юрисдикции РФ, трансграничной передачи ПДн</p>
 <p>нет; ПДн только в backend, обезличивание текста перед LLM, согласия в</p>
-<p>онбординге. Подробно — <a href="docs/ARCHITECTURE.md">docs/ARCHITECTURE.md</a>.</p>
+<p>онбординге. Подробно — <a href="https://github.com/PirateThunder/piratehunter/blob/master/docs/ARCHITECTURE.md">docs/ARCHITECTURE.md</a>.</p>
 <h3>Быстрый старт</h3>
 <pre>cp .env.example .env                               # 1. конфиг (дефолты для dev)
 docker compose --env-file .env up -d --build       # 2. всё: 4 сервиса + PG×2 + Redis
 ./scripts/seed.sh                                  # 3. эталонные демо-данные</pre>
-<p>Открыть http://localhost:56151. OpenAPI — <b>https://api.piratehunter.fun/docs</b></p>
+<p>Открыть <a href="http://localhost:56151.">http://localhost:56151.</a> OpenAPI — <b><a href="https://api.piratehunter.fun/docs">https://api.piratehunter.fun/docs</a></b></p>
 <p>на проде, локально <code class="mono">http://localhost:64844/docs</code> (<code class="mono">BACK_ENV=local</code>).</p>
 <p>Сквозной смоук: <code class="mono">./scripts/smoke.sh</code> (17 шагов по</p>
 <p>живому стеку), сброс стенда: <code class="mono">./scripts/reset-dev.sh</code>. Подробно —</p>
-<p><a href="docs/RUN.md">docs/RUN.md</a>.</p>
+<p><a href="https://github.com/PirateThunder/piratehunter/blob/master/docs/RUN.md">docs/RUN.md</a>.</p>
 <h3>Демо-аккаунты (dev-login)</h3>
 <p>На <code class="mono">/login</code> — кнопка входа без почты (<code class="mono">BACK_AUTH_DEV_LOGIN=1</code>, dev-дефолт;</p>
 <p>эквивалент API: <code class="mono">POST /api/v1/auth/dev {&quot;account&quot;: &quot;&lt;имя&gt;&quot;}</code>):</p>
@@ -88,14 +88,14 @@ docker compose --env-file .env up -d --build       # 2. всё: 4 сервиса
 <p>поддоменом <code class="mono">fsp-id.*</code> (см. <code class="mono">Caddyfile</code>). В dev порты опубликованы на</p>
 <p><code class="mono">127.0.0.1</code> для отладки (у PG/Redis — 55432/55433/56379). Деплой на VPS</p>
 <p>(2 vCPU/4 ГБ): образы переносятся готовыми <code class="mono">docker save | ssh docker load</code></p>
-<p>— <a href="docs/RUN.md">docs/RUN.md</a>.</p>
+<p>— <a href="https://github.com/PirateThunder/piratehunter/blob/master/docs/RUN.md">docs/RUN.md</a>.</p>
 <h3>Качество</h3>
 <p>212 автотестов (hunter_core 75 · backend 120 · fsp_registry 17), живой</p>
 <p>смоук 17 шагов, воспроизводимый цикл reset→smoke→seed, детерминированные</p>
 <p>сиды (302 кандидата / 16 компаний / 6 потребностей / 40 приглашений).</p>
 <p>Валидация (PRD §9): стабильность грейда 96.7% (порог 80%), ±1 — 100%</p>
 <p>(порог 97%), Spearman 0.972 (порог 0.85), Precision@5 0.85 (порог 0.8);</p>
-<p>полный прогон 300×3: 99% / 0.977 — <a href="docs/VALIDATION.md">docs/VALIDATION.md</a>.</p>
+<p>полный прогон 300×3: 99% / 0.977 — <a href="https://github.com/PirateThunder/piratehunter/blob/master/docs/VALIDATION.md">docs/VALIDATION.md</a>.</p>
 <h3>Структура</h3>
 <pre>piratehunter/
 ├── PRD.md               # источник правды по продукту
@@ -117,7 +117,7 @@ docker compose --env-file .env up -d --build       # 2. всё: 4 сервиса
 <p>Платформа-агрегатор ИТ-вакансий с обратной механикой: работодатель сам</p>
 <p>находит кандидата в категоризованной базе. Четыре сервиса в монорепо,</p>
 <p>общение только по HTTP, ноль shared-кода (принципы унаследованы от</p>
-<p>проекта piratepitch). Живой сервис: <b>https://piratehunter.fun</b>.</p>
+<p>проекта piratepitch). Живой сервис: <b><a href="https://piratehunter.fun">https://piratehunter.fun</a></b>.</p>
 <h3>Диаграмма</h3>
 <pre>flowchart TD
     Browser[Браузер] --&gt;|same-origin /api/* rewrites| FE[frontend :56151&lt;br/&gt;Next.js 16, FSD]
@@ -236,7 +236,7 @@ docker compose --env-file .env up -d --build       # 2. всё: 4 сервиса
 <p>точные токены из брендбука (<code class="mono">accent #402FFF</code>, <code class="mono">ink #1B1C21</code>, Inter +</p>
 <p>JetBrains Mono), тема — сменяемый слой (<code class="mono">tokens.fsp.css</code>).</p></div>
 <div class="section"><h1>2. Запуск и развёртывание</h1><h2>Запуск и развёртывание PirateHunter</h2>
-<p>Живой сервис: <b>https://piratehunter.fun</b>. Инфраструктура: Docker +</p>
+<p>Живой сервис: <b><a href="https://piratehunter.fun">https://piratehunter.fun</a></b>. Инфраструктура: Docker +</p>
 <p>docker-compose + Caddy (авто-TLS). Вся система поднимается одной</p>
 <p>командой на чистой машине.</p>
 <h3>Локальный запуск (docker compose)</h3>
@@ -250,7 +250,7 @@ curl localhost:51457/health    # core-api
 curl localhost:52457/health    # fsp-registry
 curl localhost:56151/          # frontend
 curl localhost:52457/fsp/v1/profiles/fsp_001   # синтетический профиль ФСП (или 404)</pre>
-<p>OpenAPI backend — <b>https://api.piratehunter.fun/docs</b> (живой Swagger на</p>
+<p>OpenAPI backend — <b><a href="https://api.piratehunter.fun/docs">https://api.piratehunter.fun/docs</a></b> (живой Swagger на</p>
 <p>проде) или локально <code class="mono">http://localhost:64844/docs</code> (при <code class="mono">BACK_ENV=local</code>).</p>
 <p>Вход по email-коду: без SMTP код пишется в лог backend</p>
 <p>(<code class="mono">docker compose logs -f backend</code>, поле <code class="mono">dev_code</code>). При</p>
@@ -394,7 +394,7 @@ junior       0      29       1       0
 middle       0       1      29       0
 senior       0       0       0      30</pre>
 <p>Графики прогона:</p>
-<ul><li><a href="../hunter_core/out/validation/confusion.png">confusion.png</a> — confusion-матрица «истинный × присвоенный» грейд;</li><li><a href="../hunter_core/out/validation/theta_scatter.png">theta_scatter.png</a> — рассеяние θ_est от θ_true с полосами грейдов.</li></ul>
+<ul><li><a href="https://github.com/PirateThunder/piratehunter/blob/master/hunter_core/out/validation/confusion.png">confusion.png</a> — confusion-матрица «истинный × присвоенный» грейд;</li><li><a href="https://github.com/PirateThunder/piratehunter/blob/master/hunter_core/out/validation/theta_scatter.png">theta_scatter.png</a> — рассеяние θ_est от θ_true с полосами грейдов.</li></ul>
 <p>Эквивалентность экземпляров проверена на 10 шаблонах × 50 seeds × 100</p>
 <p>агентов (θ = 1.0): средняя доля seeds вне ДИ 4.2%, битых экземпляров</p>
 <p>(генератор/чекер не сошлись) — 0. Правило релевантности в подборе:</p>
@@ -596,7 +596,7 @@ BACK_FSP_CLIENT_ID / BACK_FSP_CLIENT_SECRET           # client-конфиг</pre
 <p>заменяется боевым API с тем же контрактом ответа (200/404).</p></div>
 <div class="section"><h1>7. API</h1><h2>API PirateHunter</h2>
 <p>Открытый REST API платформы — <code class="mono">backend /api/v1</code> (JWT). Спецификация —</p>
-<p>OpenAPI: <b>живой Swagger UI — https://api.piratehunter.fun/docs</b></p>
+<p>OpenAPI: <b>живой Swagger UI — <a href="https://api.piratehunter.fun/docs">https://api.piratehunter.fun/docs</a></b></p>
 <p>(в проде включается флагом <code class="mono">BACK_DOCS_PUBLIC=1</code>; локально —</p>
 <p><code class="mono">http://localhost:64844/docs</code> при <code class="mono">BACK_ENV=local</code>). Канонические контракты</p>
 <p>версионированы (<code class="mono">/api/v1</code>), auth-слой готов к публичному API с ключами</p>
@@ -641,8 +641,8 @@ BACK_FSP_CLIENT_ID / BACK_FSP_CLIENT_SECRET           # client-конфиг</pre
 <p><b>Полная проработка</b> — защита от недобросовестных работодателей (модель</p>
 <p>угроз, что уже в MVP и что в roadmap) и интеграция с ATS (сценарии,</p>
 <p>подписи вебхуков, идемпотентность, примеры) — в</p>
-<p><a href="ANTIFRAUD-ATS.md">ANTIFRAUD-ATS.md</a>.</p>
-<p><b>Публичный OpenAPI (живой):</b> https://api.piratehunter.fun/docs —</p>
+<p><a href="https://github.com/PirateThunder/piratehunter/blob/master/docs/ANTIFRAUD-ATS.md">ANTIFRAUD-ATS.md</a>.</p>
+<p><b>Публичный OpenAPI (живой):</b> <a href="https://api.piratehunter.fun/docs">https://api.piratehunter.fun/docs</a> —</p>
 <p>можно открыть и потрогать прямо из Swagger UI.</p>
 <h3>Roadmap API</h3>
 <ul><li><b>Публичный API с ключами</b> (<code class="mono">/public/v1</code>, паттерн piratepitch):</li></ul>
