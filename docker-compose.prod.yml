@@ -1,0 +1,40 @@
+# PirateHunter — продовое дополнение к docker-compose.yml: Caddy наружу.
+# Порты приложений остаются на 127.0.0.1 (compose), наружу смотрит только
+# Caddy (80/443, TLS от Let's Encrypt). Поднимать:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# Требование: A-записи piratehunter.fun / fsp-id.piratehunter.fun → IP VPS.
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
+
+  backend:
+    environment:
+      # прод-домены: OIDC-флоу ведёт браузер через origin фронта и
+      # поддомен мок-провайдера «FSP ID»
+      BACK_FSP_PUBLIC_URL: https://fsp-id.piratehunter.fun
+      BACK_FSP_REDIRECT_URI: https://piratehunter.fun/api/v1/auth/fsp/callback
+      BACK_FRONT_URL: https://piratehunter.fun
+      BACK_ENV: prod
+      BACK_AUTH_DEV_LOGIN: 1   # демо-кнопки для жюри (выключить после защиты)
+      BACK_CORS_ORIGINS: https://piratehunter.fun
+
+  fsp-registry:
+    environment:
+      FSPREG_ISSUER: https://fsp-id.piratehunter.fun
+
+volumes:
+  caddy_data:
+  caddy_config:
