@@ -22,9 +22,15 @@ CAT-тест на заявленный грейд (грейд = результа
 единый PDF собирается `docs/build_docs.py`).
 
 **Стек:** Python 3.13 · FastAPI · Pydantic v2 · SQLAlchemy 2 (async) ·
-Alembic · PostgreSQL 16 ×2 · Redis 7 · numpy (IRT) · OpenRouter LLM
-(Qwen-класс, с fallback) · Next.js 16 (App Router, FSD) · Bun ·
-Tailwind v4 · zustand · Docker · Caddy · pytest/ruff/biome.
+Alembic · PostgreSQL 16 ×2 · Redis 7 · numpy (IRT) · LLM Cloud.ru
+Evolution (Qwen3.6-35B-A3B, ДЦ РФ; OpenRouter — опция) · Next.js 16
+(App Router, FSD) · Bun · Tailwind v4 · zustand · Docker · Caddy ·
+pytest/ruff/biome.
+
+**152-ФЗ / data residency:** весь контур — хостинг (Selectel, ЦОД РФ) и
+LLM (Cloud.ru, ЦОД РФ) — в юрисдикции РФ, трансграничной передачи ПДн
+нет; ПДн только в backend, обезличивание текста перед LLM, согласия в
+онбординге. Подробно — [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Быстрый старт
 

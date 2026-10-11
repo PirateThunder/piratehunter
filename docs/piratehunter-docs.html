@@ -54,9 +54,14 @@ hr { border: none; border-top: 1px solid #EDEDED; margin: 8pt 0; }
 <p>(ARCHITECTURE, RUN, TESTING, VALIDATION, MATCHING, FSP-INTEGRATION, API;</p>
 <p>единый PDF собирается <code class="mono">docs/build_docs.py</code>).</p>
 <p><b>Стек:</b> Python 3.13 · FastAPI · Pydantic v2 · SQLAlchemy 2 (async) ·</p>
-<p>Alembic · PostgreSQL 16 ×2 · Redis 7 · numpy (IRT) · OpenRouter LLM</p>
-<p>(Qwen-класс, с fallback) · Next.js 16 (App Router, FSD) · Bun ·</p>
-<p>Tailwind v4 · zustand · Docker · Caddy · pytest/ruff/biome.</p>
+<p>Alembic · PostgreSQL 16 ×2 · Redis 7 · numpy (IRT) · LLM Cloud.ru</p>
+<p>Evolution (Qwen3.6-35B-A3B, ДЦ РФ; OpenRouter — опция) · Next.js 16</p>
+<p>(App Router, FSD) · Bun · Tailwind v4 · zustand · Docker · Caddy ·</p>
+<p>pytest/ruff/biome.</p>
+<p><b>152-ФЗ / data residency:</b> весь контур — хостинг (Selectel, ЦОД РФ) и</p>
+<p>LLM (Cloud.ru, ЦОД РФ) — в юрисдикции РФ, трансграничной передачи ПДн</p>
+<p>нет; ПДн только в backend, обезличивание текста перед LLM, согласия в</p>
+<p>онбординге. Подробно — <a href="docs/ARCHITECTURE.md">docs/ARCHITECTURE.md</a>.</p>
 <h3>Быстрый старт</h3>
 <pre>cp .env.example .env                               # 1. конфиг (дефолты для dev)
 docker compose --env-file .env up -d --build       # 2. всё: 4 сервиса + PG×2 + Redis
@@ -166,6 +171,14 @@ docker compose --env-file .env up -d --build       # 2. всё: 4 сервиса
 <ul><li><b>Детерминированные fallback везде</b>: LLM-фичи (парсинг потребности,</li></ul>
 <p>  перефразировка заданий) работают и без ключа/сети — демо не зависит</p>
 <p>  от внешних API.</p>
+<h3>Соответствие 152-ФЗ и data residency</h3>
+<p>Контур целиком развёрнут в юрисдикции РФ — **трансграничной передачи</p>
+<p>персональных данных нет ни на одном участке**:</p>
+<table><thead><tr><th>Участок</th><th>Где исполняется</th><th>Комментарий</th></tr></thead><tbody><tr><td>Хостинг стенда</td><td>VPS, ЦОД РФ (Selectel)</td><td>docker compose + Caddy, данные на дисках в РФ</td></tr><tr><td>LLM-контур</td><td><b>Cloud.ru Evolution Foundation Models</b> (Qwen/Qwen3.6-35B-A3B), ЦОД РФ</td><td>serverless у российского облачного провайдера; <code class="mono">HUNTER_LLM_PROVIDER=cloudru</code></td></tr><tr><td>Мок-реестр ФСП / OIDC</td><td>внутри docker-сети стенда</td><td>синтетика, без ПДн; боевой провайдер заменяется конфигом</td></tr><tr><td>ПДн (ФИО, телефоны, контакты, согласия)</td><td>только backend (<code class="mono">ph_back</code>)</td><td>в core-api уходят лишь <code class="mono">candidate_id</code> и оценочный снапшот</td></tr><tr><td>Текст резюме перед LLM</td><td>backend (<code class="mono">app/resume/sanitize.py</code>)</td><td>обезличивание (email/телефоны/telegram/URL вырезаются) — защита в глубину поводя ЦОД</td></tr></tbody></table>
+<p>Дополнительно: согласия пользователей фиксируются при онбординге</p>
+<p>(<code class="mono">consent_pd</code>, <code class="mono">consent_publish</code>), контакты кандидата скрыты до accept</p>
+<p>(§7.6), есть анонимный режим карточки. Смена LLM-провайдера — конфигом</p>
+<p>(<code class="mono">HUNTER_LLM_PROVIDER=openrouter|cloudru</code>), код не меняется.</p>
 <h3>Потоки данных</h3>
 <h4>Оценочный снапшот (backend → core-api)</h4>
 <p>После каждого изменения профиля (тест пройден, ФСП привязан/отвязан,</p>
