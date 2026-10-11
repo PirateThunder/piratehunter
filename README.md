@@ -15,11 +15,11 @@ CAT-тест на заявленный грейд (грейд = результа
 
 Кейс ФСП (ЛЦТ 2026, спец. трек). **Живой сервис: https://piratehunter.fun**.
 Репозиторий: https://github.com/PirateThunder/piratehunter
-(плейсхолдер — заменить на публичный к сдаче). Источник правды по
+(публичный). Источник правды по
 продукту — [PRD.md](PRD.md); материалы кейса (ТЗ, брендбук) — в
 `materials/` (не в git). Техническая документация — [docs/](docs/)
-(ARCHITECTURE, RUN, TESTING, VALIDATION, MATCHING, FSP-INTEGRATION, API;
-единый PDF собирается `docs/build_docs.py`).
+(ARCHITECTURE, RUN, TESTING, VALIDATION, MATCHING, FSP-INTEGRATION, API,
+ANTIFRAUD-ATS; единый PDF собирается `docs/build_docs.py`).
 
 **Стек:** Python 3.13 · FastAPI · Pydantic v2 · SQLAlchemy 2 (async) ·
 Alembic · PostgreSQL 16 ×2 · Redis 7 · numpy (IRT) · LLM Cloud.ru

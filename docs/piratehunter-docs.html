@@ -48,11 +48,11 @@ hr { border: none; border-top: 1px solid #EDEDED; margin: 8pt 0; }
 <p>показывается со статусом, участвует в подборке без буста.</p>
 <p>Кейс ФСП (ЛЦТ 2026, спец. трек). <b>Живой сервис: https://piratehunter.fun</b>.</p>
 <p>Репозиторий: https://github.com/PirateThunder/piratehunter</p>
-<p>(плейсхолдер — заменить на публичный к сдаче). Источник правды по</p>
+<p>(публичный). Источник правды по</p>
 <p>продукту — <a href="PRD.md">PRD.md</a>; материалы кейса (ТЗ, брендбук) — в</p>
 <p><code class="mono">materials/</code> (не в git). Техническая документация — <a href="docs/">docs/</a></p>
-<p>(ARCHITECTURE, RUN, TESTING, VALIDATION, MATCHING, FSP-INTEGRATION, API;</p>
-<p>единый PDF собирается <code class="mono">docs/build_docs.py</code>).</p>
+<p>(ARCHITECTURE, RUN, TESTING, VALIDATION, MATCHING, FSP-INTEGRATION, API,</p>
+<p>ANTIFRAUD-ATS; единый PDF собирается <code class="mono">docs/build_docs.py</code>).</p>
 <p><b>Стек:</b> Python 3.13 · FastAPI · Pydantic v2 · SQLAlchemy 2 (async) ·</p>
 <p>Alembic · PostgreSQL 16 ×2 · Redis 7 · numpy (IRT) · LLM Cloud.ru</p>
 <p>Evolution (Qwen3.6-35B-A3B, ДЦ РФ; OpenRouter — опция) · Next.js 16</p>
@@ -634,6 +634,10 @@ BACK_FSP_CLIENT_ID / BACK_FSP_CLIENT_SECRET           # client-конфиг</pre
 <ol><li>Статусы: webhooks платформы по смене статусов приглашений/откликов</li></ol>
 <p>   (<code class="mono">sent → viewed → accepted/declined</code>) + маппинг на типовые этапы</p>
 <p>   ATS-воронки (screening → interview → offer).</p>
+<p><b>Полная проработка</b> — защита от недобросовестных работодателей (модель</p>
+<p>угроз, что уже в MVP и что в roadmap) и интеграция с ATS (сценарии,</p>
+<p>подписи вебхуков, идемпотентность, примеры) — в</p>
+<p><a href="ANTIFRAUD-ATS.md">ANTIFRAUD-ATS.md</a>.</p>
 <h3>Roadmap API</h3>
 <ul><li><b>Публичный API с ключами</b> (<code class="mono">/public/v1</code>, паттерн piratepitch):</li></ul>
 <p>  версионирование <code class="mono">/api/v1</code> и auth-слой уже готовы — дёшево.</p>

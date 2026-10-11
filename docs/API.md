@@ -97,6 +97,11 @@ core-api (`/internal/*`) и fsp_registry (`/fsp/v1`, `/oidc/*`) наружу н�
    (`sent → viewed → accepted/declined`) + маппинг на типовые этапы
    ATS-воронки (screening → interview → offer).
 
+**Полная проработка** — защита от недобросовестных работодателей (модель
+угроз, что уже в MVP и что в roadmap) и интеграция с ATS (сценарии,
+подписи вебхуков, идемпотентность, примеры) — в
+[ANTIFRAUD-ATS.md](ANTIFRAUD-ATS.md).
+
 ## Roadmap API
 
 - **Публичный API с ключами** (`/public/v1`, паттерн piratepitch):
