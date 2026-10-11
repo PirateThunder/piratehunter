@@ -145,8 +145,10 @@ bootstrap через `/auth/refresh`. Подробно — FSP-INTEGRATION.md.
 ## Стек
 
 Python 3.13 + FastAPI + Pydantic v2 + SQLAlchemy 2 (async) + Alembic,
-pytest, ruff; numpy для IRT-математики; LLM — OpenRouter (open-weights
-модель Qwen-класса) с детерминированным fallback. Frontend: Next.js
+pytest, ruff; numpy для IRT-математики; LLM — **Cloud.ru Evolution Foundation
+Models** (Qwen3.6-35B-A3B, ДЦ в РФ — контур 152-ФЗ; смена провайдера —
+конфигом `HUNTER_LLM_PROVIDER`: openrouter | cloudru) с детерминированным
+fallback. Frontend: Next.js
 16.3.1 (App Router, React Compiler), Bun, Tailwind v4, Base UI,
 zustand, ky, biome, архитектура FSD (`src/fsd/*`). Айдентика ФСП —
 точные токены из брендбука (`accent #402FFF`, `ink #1B1C21`, Inter +

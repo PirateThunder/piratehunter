@@ -75,3 +75,27 @@ def test_code_block_guard_falls_back():
 
     client = _client(handler)
     assert reword_shell(ORIGINAL, "python", client) == ORIGINAL
+
+
+def test_cloudru_provider_config():
+    """Провайдер cloudru: ДЦ РФ, ключ из CLOUDRU_API_KEY, модель Qwen3.6."""
+    client = LLMClient(provider="cloudru", api_key="k")
+    assert client.available
+    assert client.base_url == "https://foundation-models.api.cloud.ru/v1"
+    assert client.model == "Qwen/Qwen3.6-35B-A3B"
+
+
+def test_provider_from_env(monkeypatch):
+    monkeypatch.setenv("HUNTER_LLM_PROVIDER", "cloudru")
+    monkeypatch.setenv("CLOUDRU_API_KEY", "env-key")
+    monkeypatch.delenv("HUNTER_LLM_MODEL", raising=False)
+    client = LLMClient()
+    assert client.available
+    assert "cloud.ru" in client.base_url
+
+
+def test_unknown_provider_rejected():
+    import pytest
+
+    with pytest.raises(Exception, match="провайдер"):
+        LLMClient(provider="nope", api_key="k")

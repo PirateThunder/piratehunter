@@ -47,7 +47,7 @@ hr { border: none; border-top: 1px solid #EDEDED; margin: 8pt 0; }
 <p>но не на грейд; кейс «нет истории ФСП» — первоклассный: профиль</p>
 <p>показывается со статусом, участвует в подборке без буста.</p>
 <p>Кейс ФСП (ЛЦТ 2026, спец. трек). <b>Живой сервис: https://piratehunter.fun</b>.</p>
-<p>Репозиторий: https://github.com/piratehunter-team/piratehunter</p>
+<p>Репозиторий: https://github.com/PirateThunder/piratehunter</p>
 <p>(плейсхолдер — заменить на публичный к сдаче). Источник правды по</p>
 <p>продукту — <a href="PRD.md">PRD.md</a>; материалы кейса (ТЗ, брендбук) — в</p>
 <p><code class="mono">materials/</code> (не в git). Техническая документация — <a href="docs/">docs/</a></p>
@@ -213,8 +213,10 @@ docker compose --env-file .env up -d --build       # 2. всё: 4 сервиса
 <p>  <code class="mono">FspProfile(fsp_id, rating, ranks, contests, events)</code>; БД не нужна.</p>
 <h3>Стек</h3>
 <p>Python 3.13 + FastAPI + Pydantic v2 + SQLAlchemy 2 (async) + Alembic,</p>
-<p>pytest, ruff; numpy для IRT-математики; LLM — OpenRouter (open-weights</p>
-<p>модель Qwen-класса) с детерминированным fallback. Frontend: Next.js</p>
+<p>pytest, ruff; numpy для IRT-математики; LLM — **Cloud.ru Evolution Foundation</p>
+<p>Models** (Qwen3.6-35B-A3B, ДЦ в РФ — контур 152-ФЗ; смена провайдера —</p>
+<p>конфигом <code class="mono">HUNTER_LLM_PROVIDER</code>: openrouter | cloudru) с детерминированным</p>
+<p>fallback. Frontend: Next.js</p>
 <p>16.3.1 (App Router, React Compiler), Bun, Tailwind v4, Base UI,</p>
 <p>zustand, ky, biome, архитектура FSD (<code class="mono">src/fsd/*</code>). Айдентика ФСП —</p>
 <p>точные токены из брендбука (<code class="mono">accent #402FFF</code>, <code class="mono">ink #1B1C21</code>, Inter +</p>

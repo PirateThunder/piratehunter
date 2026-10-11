@@ -1,12 +1,16 @@
-"""OpenRouter LLM-клиент + перефразировка оболочек заданий (PRD §3.4).
+"""LLM-клиент (OpenAI-совместимый) + перефразировка оболочек заданий (PRD §3.4).
 
-Минимальный AIClient: POST https://openrouter.ai/api/v1/chat/completions,
-ключ из env OPENROUTER_API_KEY, модель из env HUNTER_LLM_MODEL (дефолт —
-недорогая qwen-2.5-7b-instruct), ретраи ×3 с экспоненциальной паузой,
-timeout. reword_shell перефразирует легенду задания, НЕ меняя код/числа/
-варианты (промпт это явно требует + проверка сохранности код-блоков);
-fallback: нет ключа / ошибка / таймаут → исходный текст. Исключения наружу
-из reword_shell не выбрасываются никогда — демо не зависит от сети и ключей.
+Провайдер выбирается env HUNTER_LLM_PROVIDER:
+- openrouter (дефолт): api.openrouter.ai, ключ OPENROUTER_API_KEY;
+- cloudru: Cloud.ru Evolution Foundation Models (ДЦ в РФ — контур 152-ФЗ:
+  персональные данные не покидают юрисдикцию), ключ CLOUDRU_API_KEY,
+  модель по умолчанию Qwen/Qwen3.6-35B-A3B.
+
+POST {base}/chat/completions, ретраи ×3 с экспоненциальной паузой, timeout.
+reword_shell перефразирует легенду задания, НЕ меняя код/числа/варианты
+(промпт это явно требует + проверка сохранности код-блоков); fallback: нет
+ключа / ошибка / таймаут → исходный текст. Исключения наружу из reword_shell
+не выбрасываются никогда — демо не зависит от сети и ключей.
 """
 
 from __future__ import annotations
@@ -17,12 +21,27 @@ from typing import Any
 
 import httpx
 
-DEFAULT_BASE_URL = "https://openrouter.ai/api/v1"
-DEFAULT_MODEL = "qwen/qwen-2.5-7b-instruct"
 DEFAULT_TIMEOUT_S = 30.0
 MAX_RETRIES = 3
 
-ENV_API_KEY = "OPENROUTER_API_KEY"
+PROVIDERS: dict[str, dict[str, str]] = {
+    "openrouter": {
+        "base_url": "https://openrouter.ai/api/v1",
+        "key_env": "OPENROUTER_API_KEY",
+        "model": "qwen/qwen-2.5-7b-instruct",
+    },
+    # Cloud.ru Evolution Foundation Models: serverless, ДЦ РФ, ₽/токен.
+    # Qwen3.6 — reasoning-модель: без отключения thinking content приходит
+    # пустым (паттерн из piratepitch: chat_template_kwargs.enable_thinking).
+    "cloudru": {
+        "base_url": "https://foundation-models.api.cloud.ru/v1",
+        "key_env": "CLOUDRU_API_KEY",
+        "model": "Qwen/Qwen3.6-35B-A3B",
+        "no_thinking": "1",
+    },
+}
+
+ENV_PROVIDER = "HUNTER_LLM_PROVIDER"
 ENV_MODEL = "HUNTER_LLM_MODEL"
 
 
@@ -35,14 +54,23 @@ class LLMClient:
         self,
         api_key: str | None = None,
         model: str | None = None,
-        base_url: str = DEFAULT_BASE_URL,
+        base_url: str | None = None,
+        provider: str | None = None,
         timeout: float = DEFAULT_TIMEOUT_S,
         max_retries: int = MAX_RETRIES,
         transport: httpx.BaseTransport | None = None,
     ) -> None:
-        self.api_key = api_key if api_key is not None else os.getenv(ENV_API_KEY, "")
-        self.model = model or os.getenv(ENV_MODEL) or DEFAULT_MODEL
-        self.base_url = base_url.rstrip("/")
+        provider = provider or os.getenv(ENV_PROVIDER, "openrouter")
+        if provider not in PROVIDERS:
+            raise LLMError(
+                f"неизвестный провайдер {provider!r}; доступны: {', '.join(PROVIDERS)}"
+            )
+        cfg = PROVIDERS[provider]
+        key_env = cfg["key_env"]
+        self._no_thinking = cfg.get("no_thinking") == "1"
+        self.api_key = api_key if api_key is not None else os.getenv(key_env, "")
+        self.model = model or os.getenv(ENV_MODEL) or cfg["model"]
+        self.base_url = (base_url or cfg["base_url"]).rstrip("/")
         self.timeout = timeout
         self.max_retries = max_retries
         self._http = httpx.Client(timeout=timeout, transport=transport)
@@ -59,7 +87,7 @@ class LLMClient:
              max_tokens: int = 1200) -> str:
         """Один вызов chat/completions с ретраями; по исчерпании — LLMError."""
         if not self.available:
-            raise LLMError(f"не задан {ENV_API_KEY}")
+            raise LLMError("не задан API-ключ провайдера")
         headers = {"Authorization": f"Bearer {self.api_key}"}
         payload: dict[str, Any] = {
             "model": self.model,
@@ -67,6 +95,8 @@ class LLMClient:
             "temperature": temperature,
             "max_tokens": max_tokens,
         }
+        if self._no_thinking:
+            payload["chat_template_kwargs"] = {"enable_thinking": False}
         last_error: Exception | None = None
         for attempt in range(self.max_retries):
             try:

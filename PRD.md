@@ -154,9 +154,11 @@ hunter_core оперирует анонимными `candidate_id` и снапш
 паттерн piratepitch).
 
 - AIClient по паттерну piratepitch (реализован в `hunter_core/llm/`):
-  провайдеры за интерфейсом; рабочий вариант — OpenRouter, для сдачи
-  фиксируем **open-weights модель** (Qwen-класса) и её id в MODELS.md.
-  Смена провайдера/модели — конфигом, без правок кода.
+  провайдеры за интерфейсом; **для сдачи — Cloud.ru Evolution Foundation
+  Models** (Qwen/Qwen3.6-35B-A3B, serverless, ДЦ в РФ: персональные
+  данные в LLM-контуре не покидают юрисдикцию — 152-ФЗ), openrouter —
+  опциональная альтернатива. Смена провайдера/модели — конфигом
+  (`HUNTER_LLM_PROVIDER`, `HUNTER_LLM_MODEL`), без правок кода.
 - Применения (все — с детерминированным fallback, система работает и без
   LLM — демо не зависит от сети и ключей):
   1. Разбор PDF-резюме в структуру профиля (fallback: пустая форма).
@@ -726,8 +728,9 @@ vs рынок по категории»** — медиана и квартили
 - `GET /internal/catalog` → специализации/грейды/темы
 - `PUT /internal/snapshots/{candidate_id}` — пуш снапшота от backend
 - `POST /internal/llm/parse-need {raw_text}` → `{spec, grade,
-  stack_must, stack_nice, confidence, notes}` — LLM (OpenRouter) с
-  детерминированным keyword-fallback; невалидные slug'и → null
+  stack_must, stack_nice, confidence, notes}` — LLM (Cloud.ru EFM,
+  ДЦ РФ; `HUNTER_LLM_PROVIDER=cloudru`) с детерминированным
+  keyword-fallback; невалидные slug'и → null
 - `POST /internal/match {need}` → `[{candidate_id, score, explanation}]`
 - `GET /internal/category/{spec}/{grade}/ranking` → ранжированная категория
 
@@ -932,7 +935,8 @@ Q&A); **видео вместо живого стенда допустимо** (
 
 - **Фаза 0 — ядро CLI (07.10): ✅ СДЕЛАНО.** `hunter_core/` реализован:
   каталог §6, фабрики шаблонов (8 семейств mcq + 3 SQL-домена),
-  CAT-движок с экспресс-режимом, скоринг с explanation, OpenRouter-
+  CAT-движок с экспресс-режимом, скоринг с explanation, LLM-провайдер
+  (Cloud.ru EFM, ДЦ РФ) с детерминированным fallback —
   клиент с fallback, валидационный харнесс. 49 тестов зелёные,
   валидация §9.3 — PASS (стабильность 96.7%±, Spearman 0.972,
   Precision@5 0.85; полный прогон 300×3: 99% / 0.977).

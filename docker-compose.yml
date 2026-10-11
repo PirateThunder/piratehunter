@@ -116,6 +116,9 @@ services:
       CORE_INTERNAL_TOKEN: ${CORE_INTERNAL_TOKEN:-}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       HUNTER_LLM_MODEL: ${HUNTER_LLM_MODEL:-}
+      # LLM-провайдер: openrouter (дефолт) | cloudru (ДЦ РФ, 152-ФЗ)
+      HUNTER_LLM_PROVIDER: ${HUNTER_LLM_PROVIDER:-openrouter}
+      CLOUDRU_API_KEY: ${CLOUDRU_API_KEY:-}
     ports:
       # internal-сервис: порт только для отладки, Caddy не проксирует
       - "127.0.0.1:51457:51457"
