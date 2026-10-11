@@ -107,4 +107,4 @@ curl https://piratehunter.fun/api/v1/employer/needs/$NEED_ID/shortlist \
 | Приглашение без вилки отклоняется | `scripts/smoke.sh`, шаг 9 (422) |
 | Лимит 100 приглашений/час | NFR §12, `invitation_rate_per_hour` в конфиге backend |
 | ПДн не уходят в core/LLM | `backend/tests/test_resume.py` (обезличивание), снапшоты без ПДн |
-| Открытый API | `http://<backend>/docs` при `BACK_ENV=local`, `docs/API.md` |
+- Открытый API | https://api.piratehunter.fun/docs — живой Swagger UI платформы |

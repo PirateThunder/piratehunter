@@ -30,6 +30,8 @@ services:
       BACK_ENV: prod
       BACK_AUTH_DEV_LOGIN: 1   # демо-кнопки для жюри (выключить после защиты)
       BACK_CORS_ORIGINS: https://piratehunter.fun
+      # публичный OpenAPI для интеграторов: api.piratehunter.fun/docs
+      BACK_DOCS_PUBLIC: 1
 
   fsp-registry:
     environment:

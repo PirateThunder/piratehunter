@@ -28,6 +28,13 @@ fsp-id.piratehunter.fun {
 	reverse_proxy fsp-registry:52457
 }
 
+# Публичный API: OpenAPI-документация для интеграторов (ATS/партнёры).
+# Требуется A-запись api → IP; docs открывается флагом BACK_DOCS_PUBLIC=1.
+api.piratehunter.fun {
+	encode zstd gzip
+	reverse_proxy backend:64844
+}
+
 # --- internal-сервисы: НАРУЖУ НЕ ВЫСТАВЛЕНЫ намеренно (PRD §4.2) ------
 # core-api (:51457) — внутренний API, с ним общается только backend
 # внутри docker-сети. Backend наружу не проксируется: браузер ходит

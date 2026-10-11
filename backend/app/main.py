@@ -32,9 +32,12 @@ app_kwargs: dict = {
     "кандидатов и компаний, потребности, приглашения с обязательной "
     "вилкой ЗП и правилами видимости контактов (§7.6). Тест-движок и "
     "матчинг — в core-api (internal), backend оркестрирует и владеет ПДн.",
+    # публичная документация API — осознанное решение для интеграторов
+    # (ATS/партнёры): открывается флагом BACK_DOCS_PUBLIC=1
+    "contact": {"name": "PirateHunter", "url": "https://piratehunter.fun"},
 }
-if get_settings().env not in SHOW_DOCS_IN:
-    app_kwargs["openapi_url"] = None  # /docs только при BACK_ENV=local
+if get_settings().env not in SHOW_DOCS_IN and not get_settings().docs_public:
+    app_kwargs["openapi_url"] = None  # /docs при BACK_ENV=local или флаге
 
 app = FastAPI(**app_kwargs)
 

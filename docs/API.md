@@ -102,6 +102,9 @@ core-api (`/internal/*`) и fsp_registry (`/fsp/v1`, `/oidc/*`) наружу н�
 подписи вебхуков, идемпотентность, примеры) — в
 [ANTIFRAUD-ATS.md](ANTIFRAUD-ATS.md).
 
+**Публичный OpenAPI (живой):** https://api.piratehunter.fun/docs —
+можно открыть и потрогать прямо из Swagger UI.
+
 ## Roadmap API
 
 - **Публичный API с ключами** (`/public/v1`, паттерн piratepitch):

@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     # разработки (BACK_AUTH_DEV_LOGIN=1, в проде выключен!)
     jwt_secret: str | None = None
     auth_dev_login: bool = False
+    # публичная OpenAPI-документация (api.piratehunter.fun/docs) —
+    # для интеграторов ATS/партнёров; в проде включается явно
+    docs_public: bool = False
     # csv список Origin'ов фронта
     cors_origins: str = "http://localhost:56151"
 
